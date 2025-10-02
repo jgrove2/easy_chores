@@ -13,7 +13,7 @@ interface Chore {
 
 export function useChores() {
   const { group } = useGroup();
-  const [chores, setChores] = useState<Chore[]>([]);
+  const [chores] = useState<Chore[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

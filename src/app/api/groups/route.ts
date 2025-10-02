@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     
@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ groups: [] });
   } catch (error) {
+    console.error('Error fetching groups:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -48,6 +49,7 @@ export async function POST(request: NextRequest) {
       group: { id: 'temp-id', name, joinCode: 'temp-code' }
     });
   } catch (error) {
+    console.error('Error creating group:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

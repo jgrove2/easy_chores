@@ -13,8 +13,8 @@ interface Group {
 }
 
 export function useGroup() {
-  const { user, isAuthenticated } = useAuth();
-  const [group, setGroup] = useState<Group | null>(null);
+  const { isAuthenticated } = useAuth();
+  const [group] = useState<Group | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

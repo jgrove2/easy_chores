@@ -11,6 +11,46 @@ A collaborative chores management application built with Next.js 15, featuring g
 - **Due Date Tracking**: Automatic due date calculation and smart display
 - **Mobile-First Design**: Responsive UI with Tailwind CSS
 
+## 🚀 Quick Local Setup (SQLite)
+
+For the fastest local development experience with **zero external dependencies**:
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Set up environment (creates .env.local)
+cp .env.local.example .env.local
+
+# 3. Set up database and seed with sample data
+npx prisma generate
+npx prisma db push
+npm run db:seed
+
+# 4. Start development server
+npm run dev
+```
+
+**That's it!** No Docker, no PostgreSQL setup needed. The app will run with SQLite locally.
+
+### 🎯 One-Command Setup
+
+Or use the automated setup script:
+
+```bash
+# Make setup script executable and run it
+chmod +x setup.sh
+./setup.sh
+```
+
+### Optional: View Database
+
+```bash
+npm run db:studio
+```
+
+This opens Prisma Studio in your browser where you can view and edit your database.
+
 ## 📁 Project Structure
 
 ```
@@ -55,83 +95,13 @@ src/
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Authentication**: NextAuth.js
-- **Database**: PostgreSQL with Prisma ORM
-- **Deployment**: Docker containerization
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- PostgreSQL 15+
-- Docker (optional, for database)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd easy_chores
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.local.example .env.local
-   ```
-   Edit `.env.local` with your configuration:
-   ```env
-   DATABASE_URL="postgresql://username:password@localhost:5432/easy_chores"
-   NEXTAUTH_URL="http://localhost:3000"
-   NEXTAUTH_SECRET="your-secret-key"
-   GOOGLE_CLIENT_ID="your-google-client-id"
-   GOOGLE_CLIENT_SECRET="your-google-client-secret"
-   GITHUB_CLIENT_ID="your-github-client-id"
-   GITHUB_CLIENT_SECRET="your-github-client-secret"
-   ```
-
-4. **Set up the database**
-   ```bash
-   # Using Docker (recommended)
-   docker-compose up -d
-   
-   # Or set up PostgreSQL manually
-   # Then run Prisma migrations
-   npx prisma migrate dev
-   npx prisma generate
-   ```
-
-5. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-6. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 📱 Application Flow
-
-### User Journey
-1. **Login** → OAuth authentication with Google/GitHub
-2. **Group Selection** → Join existing group or create new one
-3. **Chore Dashboard** → View today's and upcoming chores
-4. **Chore Management** → Create, edit, and manage chores
-5. **Settings** → Manage group and account settings
-
-### Key Features
-- **Group-based Access**: Users must be in a group to access main features
-- **Flexible Chore Assignment**: Single person or alternating between multiple people
-- **Smart Due Dates**: Automatic calculation based on frequency and completion
-- **Mobile-First Design**: Optimized for mobile devices with bottom navigation
+- **Database**: SQLite (local) / PostgreSQL (production)
+- **ORM**: Prisma
 
 ## 🔧 Development
 
 ### Database Schema
-The application uses PostgreSQL with the following main entities:
+The application uses SQLite locally with the following main entities:
 - **Users**: Authentication and profile data
 - **Groups**: Chore groups with join codes
 - **Chores**: Chore definitions with frequency and assignment
@@ -149,22 +119,41 @@ The application uses PostgreSQL with the following main entities:
 - **Feature Components**: Domain-specific components in `src/components/`
 - **Custom Hooks**: Shared logic in `src/hooks/`
 
-## 🚀 Deployment
+## 🚀 Production Setup (PostgreSQL)
 
-### Docker Deployment
-```bash
-# Build the application
-docker build -t easy-chores .
+For production, simply change the `DATABASE_URL` in your environment to use PostgreSQL:
 
-# Run with docker-compose
-docker-compose up -d
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/easy_chores"
 ```
 
-### Environment Variables
-Ensure all required environment variables are set in production:
-- Database connection string
-- NextAuth.js configuration
-- OAuth provider credentials
+Then run:
+```bash
+npx prisma migrate deploy
+```
+
+## 📱 Application Flow
+
+### User Journey
+1. **Login** → OAuth authentication with Google/GitHub
+2. **Group Selection** → Join existing group or create new one
+3. **Chore Dashboard** → View today's and upcoming chores
+4. **Chore Management** → Create, edit, and manage chores
+5. **Settings** → Manage group and account settings
+
+### Key Features
+- **Group-based Access**: Users must be in a group to access main features
+- **Flexible Chore Assignment**: Single person or alternating between multiple people
+- **Smart Due Dates**: Automatic calculation based on frequency and completion
+- **Mobile-First Design**: Optimized for mobile devices with bottom navigation
+
+## 🎯 Benefits of This Setup
+
+✅ **Zero Dependencies** - No Docker, no PostgreSQL setup for local development  
+✅ **Instant Start** - Just `npm install && npm run dev`  
+✅ **Sample Data** - Pre-populated with example chores  
+✅ **Database GUI** - `npm run db:studio` to view/edit data  
+✅ **Production Ready** - Easy switch to PostgreSQL for deployment  
 
 ## 📝 License
 

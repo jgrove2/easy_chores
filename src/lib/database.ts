@@ -51,39 +51,39 @@ export interface ChoreCompletion {
 // Database utility functions will be implemented here
 export class DatabaseService {
   // User operations
-  async createUser(userData: Partial<User>): Promise<User> {
+  async createUser(_userData: Partial<User>): Promise<User> {
     // Implementation will be added
     throw new Error('Not implemented');
   }
 
-  async getUserById(id: string): Promise<User | null> {
+  async getUserById(_id: string): Promise<User | null> {
     // Implementation will be added
     throw new Error('Not implemented');
   }
 
   // Group operations
-  async createGroup(groupData: Partial<Group>): Promise<Group> {
+  async createGroup(_groupData: Partial<Group>): Promise<Group> {
     // Implementation will be added
     throw new Error('Not implemented');
   }
 
-  async getGroupByJoinCode(joinCode: string): Promise<Group | null> {
+  async getGroupByJoinCode(_joinCode: string): Promise<Group | null> {
     // Implementation will be added
     throw new Error('Not implemented');
   }
 
   // Chore operations
-  async createChore(choreData: Partial<Chore>): Promise<Chore> {
+  async createChore(_choreData: Partial<Chore>): Promise<Chore> {
     // Implementation will be added
     throw new Error('Not implemented');
   }
 
-  async getChoresByGroup(groupId: string): Promise<Chore[]> {
+  async getChoresByGroup(_groupId: string): Promise<Chore[]> {
     // Implementation will be added
     throw new Error('Not implemented');
   }
 
-  async completeChore(choreId: string, userId: string): Promise<ChoreCompletion> {
+  async completeChore(_choreId: string, _userId: string): Promise<ChoreCompletion> {
     // Implementation will be added
     throw new Error('Not implemented');
   }

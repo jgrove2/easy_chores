@@ -14,11 +14,11 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, token }) {
+    async session({ session }) {
       // Add custom session properties here
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token }) {
       // Add custom JWT properties here
       return token;
     },

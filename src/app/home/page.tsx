@@ -12,10 +12,10 @@ export default function HomePage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Chore Dashboard</h1>
         
         <div className="space-y-6">
-          {/* Today's Chores */}
+          {/* Today&apos;s Chores */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Today's Chores</h2>
-            <p className="text-gray-600">Today's chore list will be displayed here</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Today&apos;s Chores</h2>
+            <p className="text-gray-600">Today&apos;s chore list will be displayed here</p>
           </div>
           
           {/* Upcoming Chores */}
