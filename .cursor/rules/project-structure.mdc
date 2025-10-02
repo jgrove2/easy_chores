@@ -1,0 +1,34 @@
+---
+alwaysApply: true
+---
+
+# Easy Chores Project Structure
+
+This is a Next.js 15.5.4 application with TypeScript, Tailwind CSS v4, and React 19.
+
+## Project Architecture
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript with strict mode enabled
+- **Styling**: Tailwind CSS v4 with custom theme configuration
+- **Fonts**: Geist Sans and Geist Mono from Google Fonts
+- **Linting**: ESLint with Next.js and TypeScript rules
+
+## Key Files and Directories
+
+- **Entry Point**: [src/app/page.tsx](mdc:src/app/page.tsx) - Main application page
+- **Layout**: [src/app/layout.tsx](mdc:src/app/layout.tsx) - Root layout with font configuration
+- **Global Styles**: [src/app/globals.css](mdc:src/app/globals.css) - Tailwind imports and custom CSS variables
+- **Configuration**: [tsconfig.json](mdc:tsconfig.json) - TypeScript configuration with path mapping
+- **Package Management**: [package.json](mdc:package.json) - Dependencies and scripts
+
+## Path Mapping
+
+- Use `@/*` to reference files in the `src/` directory
+- Example: `import Component from '@/components/Component'`
+
+## Development Commands
+
+- `npm run dev` - Start development server with Turbopack
+- `npm run build` - Build for production with Turbopack
+- `npm run lint` - Run ESLint

@@ -1,0 +1,122 @@
+---
+globs: *.tsx,*.ts
+---
+
+# Chore System & Data Models
+
+## Core Data Models
+
+### Chore Entity
+```typescript
+interface Chore {
+  id: string;
+  title: string;
+  description?: string;
+  frequency: ChoreFrequency;
+  assignedTo: string[]; // User IDs
+  groupId: string;
+  isActive: boolean;
+  isPaused: boolean;
+  createdAt: Date;
+  lastCompleted?: Date;
+  nextDue: Date;
+  createdBy: string; // User ID
+}
+
+interface ChoreFrequency {
+  type: 'daily' | 'weekly' | 'custom';
+  interval: number; // Days between occurrences
+  daysOfWeek?: number[]; // For weekly chores
+}
+```
+
+### Chore Assignment System
+```typescript
+interface ChoreAssignment {
+  id: string;
+  choreId: string;
+  userId: string;
+  assignedAt: Date;
+  isAlternating: boolean;
+  order: number; // For alternating chores
+}
+```
+
+## Chore Creation Flow
+
+### Chore Creation Page
+- **Route**: `/chores/create`
+- **Form Fields**: Title, frequency, assignment options
+- **Assignment Types**:
+  - **Single Assignment**: Assign to one person
+  - **Alternating Assignment**: Rotate between multiple people
+
+### Frequency Options
+```typescript
+const frequencyOptions = [
+  { value: 'daily', label: 'Daily', interval: 1 },
+  { value: 'weekly', label: 'Weekly', interval: 7 },
+  { value: 'custom', label: 'Custom', interval: 0 }
+];
+```
+
+### Assignment Logic
+```typescript
+// Single assignment
+const assignToUser = (choreId: string, userId: string) => {
+  // Assign chore to specific user
+};
+
+// Alternating assignment
+const assignAlternating = (choreId: string, userIds: string[]) => {
+  // Set up rotation between users
+  // Track current assignee and rotate on completion
+};
+```
+
+## Home Page Chore Display
+
+### Chore List Sorting
+- **Primary Sort**: By due date (most recent first)
+- **Secondary Sort**: By creation date
+- **Display Format**: 
+  - "Today" for due today
+  - "Tomorrow" for due tomorrow
+  - "In X days" for future dates
+  - "Yesterday" for overdue
+  - "X days ago" for past due
+
+### Chore Completion Logic
+```typescript
+const markChoreComplete = async (choreId: string) => {
+  // Mark current instance as complete
+  // Generate next occurrence based on frequency
+  // Update assignment if alternating
+  // Update due date for next occurrence
+};
+```
+
+## Chores Management Page
+
+### Chore List View
+- **Route**: `/chores`
+- **Sorting**: By creation date (ID-based)
+- **Actions**: Edit, Pause, Delete, Resume
+
+### Chore Management Actions
+```typescript
+interface ChoreActions {
+  edit: (choreId: string) => void;
+  pause: (choreId: string) => void;
+  resume: (choreId: string) => void;
+  delete: (choreId: string) => void;
+}
+```
+
+## Key Components
+- **ChoreCard**: Display individual chore with due date
+- **ChoreForm**: Create/edit chore form
+- **ChoreList**: List of chores with sorting
+- **AssignmentSelector**: Choose single or alternating assignment
+- **FrequencySelector**: Set chore frequency
+- **DueDateDisplay**: Format and display due dates

@@ -1,0 +1,101 @@
+---
+globs: *.tsx,*.ts,*.css
+---
+
+# Tailwind CSS v4 Styling Guidelines
+
+## Tailwind v4 Configuration
+
+This project uses Tailwind CSS v4 with custom theme configuration in [src/app/globals.css](mdc:src/app/globals.css).
+
+## Custom Theme Variables
+
+```css
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+```
+
+## Class Organization
+
+Order Tailwind classes in this sequence:
+1. **Layout**: `flex`, `grid`, `block`, `inline`
+2. **Positioning**: `relative`, `absolute`, `fixed`
+3. **Sizing**: `w-`, `h-`, `max-w-`, `min-h-`
+4. **Spacing**: `p-`, `m-`, `gap-`, `space-`
+5. **Typography**: `text-`, `font-`, `leading-`, `tracking-`
+6. **Colors**: `bg-`, `text-`, `border-`
+7. **Effects**: `shadow-`, `opacity-`, `blur-`
+8. **Transforms**: `scale-`, `rotate-`, `translate-`
+9. **Transitions**: `transition-`, `duration-`, `ease-`
+10. **States**: `hover:`, `focus:`, `active:`, `dark:`
+
+## Responsive Design
+
+```tsx
+// Mobile-first approach
+<div className="
+  grid grid-cols-1 gap-4 p-4
+  sm:grid-cols-2 sm:gap-6 sm:p-6
+  md:grid-cols-3 md:gap-8 md:p-8
+  lg:grid-cols-4
+">
+```
+
+## Dark Mode Support
+
+```tsx
+// Use dark: prefix for dark mode styles
+<div className="
+  bg-white text-black
+  dark:bg-gray-900 dark:text-white
+">
+```
+
+## Component Styling Patterns
+
+```tsx
+// Button component with variants
+const buttonVariants = {
+  primary: "bg-blue-600 text-white hover:bg-blue-700",
+  secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300",
+  danger: "bg-red-600 text-white hover:bg-red-700"
+};
+
+// Card component
+<div className="
+  bg-white rounded-lg shadow-md border border-gray-200
+  p-6 transition-shadow hover:shadow-lg
+  dark:bg-gray-800 dark:border-gray-700
+">
+```
+
+## Typography with Geist Fonts
+
+```tsx
+// Use font variables from layout
+<body className={`
+  ${geistSans.variable} ${geistMono.variable} 
+  font-sans antialiased
+`}>
+
+// Typography classes
+<h1 className="font-sans text-4xl font-bold">
+<h2 className="font-mono text-sm text-gray-600">
+```
+
+## Best Practices
+
+- Use semantic class names for complex components
+- Extract repeated patterns into CSS custom properties
+- Leverage Tailwind's design tokens for consistency
+- Use `@apply` directive sparingly for component-specific styles
+- Prefer utility classes over custom CSS when possible

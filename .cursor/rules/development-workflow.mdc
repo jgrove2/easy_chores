@@ -1,0 +1,49 @@
+---
+description: Development workflow and best practices for Easy Chores project
+---
+
+# Development Workflow
+
+## Code Quality Standards
+
+- **ESLint**: Follow Next.js and TypeScript ESLint rules
+- **TypeScript**: Maintain strict type safety
+- **Prettier**: Use consistent code formatting
+- **Testing**: Write tests for critical functionality
+
+## Git Workflow
+
+- Use descriptive commit messages
+- Create feature branches for new functionality
+- Use conventional commits format: `type(scope): description`
+- Examples: `feat(auth): add user login`, `fix(ui): resolve button alignment`
+
+## Development Environment
+
+- Use `npm run dev` with Turbopack for fast development
+- Leverage Next.js hot reload for instant feedback
+- Use TypeScript strict mode for better error catching
+- Follow the established folder structure in `src/app/`
+
+## Performance Considerations
+
+- Use Next.js Image component for optimized images
+- Implement proper loading states
+- Use React.memo for expensive components
+- Leverage Next.js built-in optimizations (code splitting, etc.)
+
+## Accessibility Guidelines
+
+- Use semantic HTML elements
+- Include proper ARIA labels
+- Ensure keyboard navigation works
+- Test with screen readers
+- Maintain proper color contrast ratios
+
+## Security Best Practices
+
+- Sanitize user inputs
+- Use HTTPS in production
+- Implement proper authentication
+- Validate data on both client and server
+- Keep dependencies updated

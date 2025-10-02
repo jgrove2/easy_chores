@@ -1,0 +1,60 @@
+---
+globs: *.tsx,*.ts,*.js,*.jsx
+---
+
+# Next.js Development Conventions
+
+## App Router Patterns
+
+- Use the App Router structure with `src/app/` directory
+- Create route segments as folders with `page.tsx` files
+- Use `layout.tsx` for shared layouts
+- Implement `loading.tsx` for loading states
+- Add `error.tsx` for error boundaries
+- Use `not-found.tsx` for 404 pages
+
+## File Naming Conventions
+
+- **Pages**: `page.tsx` (lowercase)
+- **Layouts**: `layout.tsx` (lowercase)
+- **Components**: PascalCase (e.g., `UserProfile.tsx`)
+- **Utilities**: camelCase (e.g., `formatDate.ts`)
+- **Constants**: UPPER_SNAKE_CASE (e.g., `API_ENDPOINTS.ts`)
+
+## Component Structure
+
+```tsx
+// Import order: React, Next.js, third-party, local
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+// Type definitions
+interface ComponentProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+// Component with proper TypeScript typing
+export default function Component({ title, children }: ComponentProps) {
+  return (
+    <div>
+      <h1>{title}</h1>
+      {children}
+    </div>
+  );
+}
+```
+
+## Next.js Specific Imports
+
+- Use `next/image` for optimized images
+- Use `next/link` for client-side navigation
+- Use `next/navigation` for programmatic navigation
+- Use `next/font` for font optimization
+
+## Metadata and SEO
+
+- Export `metadata` object from page components
+- Use `generateMetadata` for dynamic metadata
+- Implement proper Open Graph and Twitter Card meta tags

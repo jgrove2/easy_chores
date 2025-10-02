@@ -1,0 +1,206 @@
+---
+globs: *.ts,*.js,*.json,*.yml,*.yaml
+---
+
+# Database & Docker Setup
+
+## Docker Compose Configuration
+
+### Database Service
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: easy_chores_db
+    environment:
+      POSTGRES_DB: easy_chores
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - easy_chores_network
+
+  app:
+    build: .
+    container_name: easy_chores_app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/easy_chores
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=http://localhost:3000
+    depends_on:
+      - postgres
+    networks:
+      - easy_chores_network
+
+volumes:
+  postgres_data:
+
+networks:
+  easy_chores_network:
+    driver: bridge
+```
+
+## Database Schema
+
+### Core Tables
+```sql
+-- Users table (extends NextAuth users)
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  image VARCHAR(500),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Groups table
+CREATE TABLE groups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  join_code VARCHAR(10) UNIQUE NOT NULL,
+  admin_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Group members table
+CREATE TABLE group_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  group_id UUID REFERENCES groups(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  role VARCHAR(20) DEFAULT 'member',
+  joined_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(group_id, user_id)
+);
+
+-- Chores table
+CREATE TABLE chores (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  frequency_type VARCHAR(20) NOT NULL, -- 'daily', 'weekly', 'custom'
+  frequency_interval INTEGER NOT NULL, -- days between occurrences
+  group_id UUID REFERENCES groups(id) ON DELETE CASCADE,
+  created_by UUID REFERENCES users(id) ON DELETE CASCADE,
+  is_active BOOLEAN DEFAULT true,
+  is_paused BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Chore assignments table
+CREATE TABLE chore_assignments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chore_id UUID REFERENCES chores(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  is_alternating BOOLEAN DEFAULT false,
+  assignment_order INTEGER DEFAULT 0,
+  assigned_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Chore completions table
+CREATE TABLE chore_completions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chore_id UUID REFERENCES chores(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  completed_at TIMESTAMP DEFAULT NOW(),
+  next_due TIMESTAMP NOT NULL
+);
+```
+
+## Environment Configuration
+
+### Environment Variables
+```bash
+# .env.local
+DATABASE_URL="postgresql://username:password@localhost:5432/easy_chores"
+NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+
+# OAuth Providers
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+GITHUB_CLIENT_ID="your-github-client-id"
+GITHUB_CLIENT_SECRET="your-github-client-secret"
+
+# Database credentials
+DB_USER="easy_chores_user"
+DB_PASSWORD="secure_password"
+```
+
+## Database Connection
+
+### Prisma Setup (Recommended)
+```typescript
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  groupMembers GroupMember[]
+  createdChores Chore[] @relation("ChoreCreator")
+  choreAssignments ChoreAssignment[]
+  choreCompletions ChoreCompletion[]
+}
+
+model Group {
+  id       String   @id @default(uuid())
+  name     String
+  joinCode String   @unique
+  adminId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  members GroupMember[]
+  chores Chore[]
+}
+```
+
+## Docker Development Setup
+
+### Development Commands
+```bash
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Reset database
+docker-compose down -v
+docker-compose up -d
+```
+
+### Security Considerations
+- Use strong passwords for database
+- Enable SSL in production
+- Use environment variables for secrets
+- Implement proper backup strategies
+- Use connection pooling for production

@@ -1,0 +1,48 @@
+---
+alwaysApply: true
+---
+
+# Authentication & User Management Structure
+
+## Authentication Flow
+
+This chores application uses NextAuth.js with Google and GitHub OAuth providers.
+
+### Login Page Structure
+- **Route**: `/login` or root redirect
+- **Providers**: Google OAuth and GitHub OAuth
+- **Redirect**: After successful authentication, redirect to main page
+- **Session Management**: Use NextAuth session handling
+
+### User State Management
+```typescript
+// User session interface
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  image?: string;
+  groupId?: string;
+}
+
+// Session handling
+const { data: session, status } = useSession();
+```
+
+### Authentication Guards
+- Protect all routes except login page
+- Redirect unauthenticated users to login
+- Handle loading states during authentication
+- Implement proper error handling for auth failures
+
+### User Profile Management
+- Allow users to edit their display name
+- Store user preferences and settings
+- Handle profile image updates
+- Manage user account settings
+
+## Key Files Structure
+- **Auth Config**: `src/lib/auth.ts` - NextAuth configuration
+- **Auth Pages**: `src/app/login/page.tsx` - Login page
+- **Middleware**: `src/middleware.ts` - Route protection
+- **Auth Components**: `src/components/auth/` - Auth-related components

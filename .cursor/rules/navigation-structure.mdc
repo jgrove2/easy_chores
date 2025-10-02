@@ -1,0 +1,117 @@
+---
+globs: *.tsx,*.ts
+---
+
+# Navigation & Page Structure
+
+## Application Flow
+
+### Main Navigation Flow
+1. **Login Page** → Authentication
+2. **Main Page** → Group selection/creation
+3. **Settings Page** → Group management
+4. **Home Page** → Chore dashboard (bottom nav)
+5. **Chores Page** → Chore management (bottom nav)
+
+## Page Structure
+
+### Root Layout (`src/app/layout.tsx`)
+```typescript
+// Main app layout with authentication
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <AuthProvider>
+          <NavigationProvider>
+            {children}
+          </NavigationProvider>
+        </AuthProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Page Routes Structure
+```
+src/app/
+├── page.tsx                 # Login/Main redirect
+├── login/
+│   └── page.tsx            # Authentication page
+├── settings/
+│   └── page.tsx            # Group management
+├── home/
+│   └── page.tsx            # Chore dashboard
+├── chores/
+│   ├── page.tsx           # Chore management list
+│   └── create/
+│       └── page.tsx       # Create new chore
+└── layout.tsx             # Root layout
+```
+
+## Bottom Navigation
+
+### Navigation Component
+```typescript
+interface NavigationItem {
+  label: string;
+  href: string;
+  icon: React.ComponentType;
+  active?: boolean;
+}
+
+const navigationItems: NavigationItem[] = [
+  { label: 'Home', href: '/home', icon: HomeIcon },
+  { label: 'Chores', href: '/chores', icon: ListIcon },
+  { label: 'Settings', href: '/settings', icon: SettingsIcon }
+];
+```
+
+### Navigation Logic
+- **Home Tab**: Show chore dashboard with due dates
+- **Chores Tab**: Show all chores in management view
+- **Settings Tab**: Group management and user settings
+- **Active State**: Highlight current page
+- **Access Control**: Only show for authenticated users in groups
+
+## Conditional Rendering
+
+### Group Status Checks
+```typescript
+// Check if user is in a group
+const { user, group } = useUserGroup();
+
+// Conditional page rendering
+if (!user) return <LoginPage />;
+if (!group) return <GroupSelectionPage />;
+return <MainAppLayout />;
+```
+
+### Page Access Control
+- **Public**: Login page only
+- **Authenticated**: All pages after login
+- **Group Required**: Home and Chores pages
+- **Admin Only**: Group management features
+
+## Key Components
+
+### Navigation Components
+- **BottomNavigation**: Main app navigation
+- **TopBar**: Page titles and actions
+- **BackButton**: Navigation history
+- **UserMenu**: User profile and logout
+
+### Layout Components
+- **AppLayout**: Main app wrapper
+- **AuthLayout**: Authentication pages layout
+- **GroupLayout**: Group-required pages layout
+- **SettingsLayout**: Settings page layout
+
+### Page Components
+- **LoginPage**: OAuth authentication
+- **GroupSelectionPage**: Join/create group
+- **HomePage**: Chore dashboard
+- **ChoresPage**: Chore management
+- **SettingsPage**: Group and user settings
+- **ChoreCreatePage**: New chore form

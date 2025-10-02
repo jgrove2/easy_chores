@@ -1,0 +1,175 @@
+---
+globs: *.tsx,*.ts
+---
+
+# React Component Patterns
+
+## Component Structure
+
+```tsx
+// 1. Imports (React, Next.js, third-party, local)
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+// 2. Type definitions
+interface ComponentProps {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+// 3. Component implementation
+export default function Component({ 
+  title, 
+  children, 
+  className = '' 
+}: ComponentProps): JSX.Element {
+  return (
+    <div className={`component-base ${className}`}>
+      <h2>{title}</h2>
+      {children}
+    </div>
+  );
+}
+```
+
+## Component Categories
+
+### Page Components
+- Located in `src/app/` directory
+- Use `page.tsx` naming convention
+- Export as default function
+- Include metadata export when needed
+
+### Layout Components
+- Use `layout.tsx` naming convention
+- Accept `children` prop
+- Handle shared UI elements (headers, footers, navigation)
+
+### UI Components
+- Create in `src/components/` directory
+- Use PascalCase naming
+- Make reusable and composable
+- Include proper TypeScript interfaces
+
+## State Management Patterns
+
+```tsx
+// Local state with useState
+const [count, setCount] = useState<number>(0);
+
+// State with proper typing
+interface FormState {
+  name: string;
+  email: string;
+  isValid: boolean;
+}
+
+const [formState, setFormState] = useState<FormState>({
+  name: '',
+  email: '',
+  isValid: false
+});
+```
+
+## Event Handling
+
+```tsx
+// Proper event typing
+const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  // Handle form submission
+};
+
+const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  event.preventDefault();
+  // Handle button click
+};
+```
+
+## Props and Children Patterns
+
+```tsx
+// Flexible children prop
+interface CardProps {
+  title: string;
+  children: React.ReactNode;
+  actions?: React.ReactNode;
+}
+
+export default function Card({ title, children, actions }: CardProps) {
+  return (
+    <div className="card">
+      <h3>{title}</h3>
+      <div className="card-content">{children}</div>
+      {actions && <div className="card-actions">{actions}</div>}
+    </div>
+  );
+}
+```
+
+## Conditional Rendering
+
+```tsx
+// Use logical AND for simple conditions
+{isLoading && <Spinner />}
+
+// Use ternary for either/or
+{user ? <UserProfile user={user} /> : <LoginForm />}
+
+// Use early returns for complex conditions
+if (!data) return <div>Loading...</div>;
+if (error) return <div>Error: {error.message}</div>;
+
+return <div>{/* Main content */}</div>;
+```
+
+## Performance Optimization
+
+```tsx
+// Memoization for expensive calculations
+const expensiveValue = useMemo(() => {
+  return heavyCalculation(data);
+}, [data]);
+
+// Callback memoization
+const handleClick = useCallback((id: string) => {
+  onItemClick(id);
+}, [onItemClick]);
+
+// Component memoization
+export default React.memo(ExpensiveComponent);
+```
+
+## Error Boundaries
+
+```tsx
+// Error boundary component
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+export default class ErrorBoundary extends React.Component<
+  React.PropsWithChildren<{}>,
+  ErrorBoundaryState
+> {
+  constructor(props: React.PropsWithChildren<{}>) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <div>Something went wrong.</div>;
+    }
+
+    return this.props.children;
+  }
+}
+```

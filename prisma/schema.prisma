@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  groupMemberships GroupMembership[]
+  choreAssignments ChoreAssignment[]
+  choreCompletions ChoreCompletion[]
+
+  @@map("users")
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  name      String
+  joinCode  String  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  memberships GroupMembership[]
+  chores      Chore[]
+
+  @@map("groups")
+}
+
+model GroupMembership {
+  id      String @id @default(cuid())
+  userId  String
+  groupId String
+  role    String @default("member") // member, admin
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("group_memberships")
+}
+
+model Chore {
+  id              String   @id @default(cuid())
+  title           String
+  frequency       String   // daily, weekly, custom
+  customInterval  Int?
+  assignmentType  String   // single, alternating
+  groupId         String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  group       Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  assignments ChoreAssignment[]
+  completions ChoreCompletion[]
+
+  @@map("chores")
+}
+
+model ChoreAssignment {
+  id       String @id @default(cuid())
+  choreId  String
+  userId   String
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  // Relations
+  chore Chore @relation(fields: [choreId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([choreId, userId])
+  @@map("chore_assignments")
+}
+
+model ChoreCompletion {
+  id          String   @id @default(cuid())
+  choreId     String
+  userId      String
+  completedAt DateTime @default(now())
+  nextDueDate DateTime
+
+  // Relations
+  chore Chore @relation(fields: [choreId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("chore_completions")
+}

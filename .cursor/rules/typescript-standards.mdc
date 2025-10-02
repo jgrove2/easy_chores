@@ -1,0 +1,95 @@
+---
+globs: *.ts,*.tsx
+---
+
+# TypeScript Coding Standards
+
+## Type Safety Requirements
+
+- **Strict Mode**: Always use strict TypeScript configuration
+- **No `any`**: Avoid using `any` type - use proper typing or `unknown`
+- **Explicit Returns**: Always specify return types for functions
+- **Interface over Type**: Prefer `interface` for object shapes, `type` for unions/primitives
+
+## Type Definitions
+
+```typescript
+// Good: Interface for object shapes
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+}
+
+// Good: Type for unions
+type Status = 'pending' | 'completed' | 'cancelled';
+
+// Good: Generic constraints
+interface ApiResponse<T> {
+  data: T;
+  status: number;
+  message: string;
+}
+```
+
+## React Component Typing
+
+```typescript
+// Props interface
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary';
+  disabled?: boolean;
+}
+
+// Component with proper typing
+export default function Button({ 
+  children, 
+  onClick, 
+  variant = 'primary',
+  disabled = false 
+}: ButtonProps): JSX.Element {
+  return (
+    <button 
+      onClick={onClick}
+      disabled={disabled}
+      className={`btn btn-${variant}`}
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+## Async/Await Patterns
+
+```typescript
+// Good: Proper error handling
+async function fetchUser(id: string): Promise<User | null> {
+  try {
+    const response = await fetch(`/api/users/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return null;
+  }
+}
+```
+
+## Import/Export Standards
+
+- Use named exports for utilities and constants
+- Use default exports for React components
+- Group imports: React, Next.js, third-party, local
+- Use absolute imports with `@/` prefix for local modules
+
+## Error Handling
+
+- Always handle potential errors in async operations
+- Use proper error types instead of generic Error
+- Implement proper fallbacks for failed operations

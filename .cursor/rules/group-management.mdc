@@ -1,0 +1,94 @@
+---
+globs: *.tsx,*.ts
+---
+
+# Group Management System
+
+## Group State Logic
+
+### User Group Status
+- **No Group**: User must join or create a group
+- **In Group**: User can access group features and leave group
+- **Group Admin**: Additional permissions for group management
+
+### Group Creation Flow
+```typescript
+interface Group {
+  id: string;
+  name: string;
+  joinCode: string;
+  createdAt: Date;
+  adminId: string;
+  members: GroupMember[];
+}
+
+interface GroupMember {
+  id: string;
+  userId: string;
+  groupId: string;
+  role: 'admin' | 'member';
+  joinedAt: Date;
+}
+```
+
+## Settings Page Structure
+
+### Settings Page Components
+- **Group Creation Form**: Create new group with name
+- **User Profile Edit**: Edit display name
+- **Group Invitation**: Generate and display join code
+- **Join Group Form**: Enter group name to join existing group
+- **Leave Group Option**: Leave current group (if in one)
+- **Logout Button**: Sign out and redirect to login screen
+
+### Settings Page Routes
+- **Route**: `/settings`
+- **Access**: Authenticated users only
+- **Layout**: Full page with form sections
+
+## Group Invitation System
+
+### Join Code Generation
+```typescript
+// Generate unique join codes
+const generateJoinCode = (): string => {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+};
+
+// Join code validation and redemption
+const redeemJoinCode = async (code: string, userId: string) => {
+  // Validate code and add user to group
+};
+```
+
+### Group Management Features
+- **Create Group**: Set group name, generate join code
+- **Join Group**: Enter group name or use join code
+- **Invite Members**: Share join code with others
+- **Leave Group**: Remove user from current group
+- **Group Settings**: Manage group name and members
+- **Logout**: Sign out user and redirect to login page
+
+## Key Components
+- **GroupSelector**: Choose between create/join options
+- **GroupCreator**: Form to create new group
+- **GroupJoiner**: Form to join existing group
+- **GroupInviter**: Display join code and invite options
+- **GroupLeaver**: Leave current group functionality
+- **LogoutButton**: Sign out and redirect to login
+
+## Logout Implementation
+```typescript
+// Logout functionality
+const handleLogout = async () => {
+  await signOut({ callbackUrl: '/login' });
+};
+
+// Logout button component
+<button 
+  onClick={handleLogout}
+  className="logout-button"
+>
+  Sign Out
+</button>
+```

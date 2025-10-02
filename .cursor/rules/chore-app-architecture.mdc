@@ -1,0 +1,86 @@
+---
+alwaysApply: true
+---
+
+# Easy Chores Application Architecture
+
+## Application Overview
+
+This is a collaborative chores management application built with Next.js 15, featuring group-based chore assignment, rotation, and tracking.
+
+## Core Features
+
+### Authentication & User Management
+- **OAuth Integration**: Google and GitHub login via NextAuth.js
+- **User Profiles**: Editable display names and profile management
+- **Session Management**: Secure session handling with automatic redirects
+
+### Group Management System
+- **Group Creation**: Users can create groups with unique join codes
+- **Group Joining**: Join existing groups via name or join code
+- **Group Settings**: Manage group members, invite new users, leave groups
+- **Admin Controls**: Group administrators can manage group settings
+
+### Chore Management System
+- **Chore Creation**: Title, frequency, and assignment configuration
+- **Assignment Types**: 
+  - Single assignment to one person
+  - Alternating assignment between multiple people
+- **Frequency Options**: Daily, weekly, or custom intervals
+- **Due Date Tracking**: Smart due date display (today, tomorrow, X days ago/from now)
+
+### Navigation & User Experience
+- **Bottom Navigation**: Home (chore dashboard) and Chores (management) tabs
+- **Conditional Access**: Group-based page access control
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+
+## Technical Stack
+
+### Frontend
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript with strict mode
+- **Styling**: Tailwind CSS v4 with custom theme
+- **Authentication**: NextAuth.js with OAuth providers
+- **State Management**: React hooks and context
+
+### Backend & Database
+- **Database**: PostgreSQL with Docker Compose
+- **ORM**: Prisma (recommended) or direct SQL
+- **API**: Next.js API routes
+- **Deployment**: Docker containerization
+
+### Development Environment
+- **Database**: PostgreSQL 15 in Docker
+- **Development**: Hot reload with Turbopack
+- **Linting**: ESLint with Next.js and TypeScript rules
+- **Type Safety**: Strict TypeScript configuration
+
+## Key Application Flows
+
+### User Onboarding
+1. **Login** → OAuth authentication
+2. **Group Selection** → Join existing or create new group
+3. **Settings Configuration** → Set up group and user preferences
+4. **Chore Dashboard** → Start managing chores
+
+### Chore Lifecycle
+1. **Create Chore** → Set title, frequency, and assignment
+2. **Assignment Logic** → Single or alternating assignment
+3. **Due Date Calculation** → Automatic next due date generation
+4. **Completion Tracking** → Mark complete, generate next occurrence
+5. **Management** → Edit, pause, delete, or resume chores
+
+## Data Models
+
+### Core Entities
+- **Users**: Authentication and profile data
+- **Groups**: Chore groups with join codes
+- **Chores**: Chore definitions with frequency and assignment
+- **Assignments**: User-to-chore assignments (single or alternating)
+- **Completions**: Chore completion history and next due dates
+
+### Relationships
+- Users belong to Groups (many-to-many)
+- Groups contain Chores (one-to-many)
+- Chores have Assignments (many-to-many)
+- Chores track Completions (one-to-many)
