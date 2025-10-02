@@ -1,6 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
+import { prisma } from './database';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -14,7 +15,42 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ session }) {
+    async signIn({ user, account, profile }) {
+      if (!user.email) return false;
+
+      try {
+        // Check if user exists
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
+        });
+
+        if (!existingUser) {
+          // Create new user
+          await prisma.user.create({
+            data: {
+              email: user.email,
+              name: user.name || profile?.name || '',
+              image: user.image || profile?.picture || profile?.avatar_url || '',
+            },
+          });
+        } else {
+          // Update existing user with latest info from provider
+          await prisma.user.update({
+            where: { email: user.email },
+            data: {
+              name: user.name || profile?.name || existingUser.name,
+              image: user.image || profile?.picture || profile?.avatar_url || existingUser.image,
+            },
+          });
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Error during sign in:', error);
+        return false;
+      }
+    },
+    async session({ session, token }) {
       // Add custom session properties here
       return session;
     },

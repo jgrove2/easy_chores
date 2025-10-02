@@ -4,35 +4,29 @@ import { useGroup } from './useGroup';
 interface Chore {
   id: string;
   title: string;
-  frequency: 'daily' | 'weekly' | 'custom';
+  frequency: string;
   customInterval?: number;
-  assignmentType: 'single' | 'alternating';
+  assignmentType: string;
+  isActive: boolean;
   nextDueDate?: Date;
   isCompleted?: boolean;
 }
 
 export function useChores() {
   const { group } = useGroup();
-  const [chores] = useState<Chore[]>([]);
+  const [chores, setChores] = useState<Chore[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!group) {
+      setChores([]);
       setIsLoading(false);
       return;
     }
 
-    const fetchChores = async () => {
-      try {
-        // Implementation will be added with API integration
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching chores:', error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchChores();
+    // Use chores from group data
+    setChores(group.chores || []);
+    setIsLoading(false);
   }, [group]);
 
   const createChore = async (choreData: Partial<Chore>) => {

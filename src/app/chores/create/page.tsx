@@ -1,16 +1,25 @@
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Create Chore - Easy Chores',
-  description: 'Create a new chore',
-};
+import { useRouter } from 'next/navigation';
+import TopBar from '@/components/navigation/TopBar';
+import BottomNavigation from '@/components/navigation/BottomNavigation';
 
 export default function CreateChorePage() {
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.back();
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <TopBar 
+        title="Create Chore" 
+        showBackButton={true}
+        onBack={handleBack}
+      />
+      
       <div className="max-w-2xl mx-auto py-6 px-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Chore</h1>
-        
         <div className="bg-white rounded-lg shadow p-6">
           <form className="space-y-6">
             {/* Chore Title */}
@@ -76,6 +85,8 @@ export default function CreateChorePage() {
           </form>
         </div>
       </div>
+      
+      <BottomNavigation />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import LoginForm from '@/components/auth/LoginForm';
 
 export const metadata: Metadata = {
   title: 'Login - Easy Chores',
@@ -17,13 +18,8 @@ export default function LoginPage() {
             Manage your household chores efficiently
           </p>
         </div>
-        {/* Login form will be implemented here */}
-        <div className="mt-8 space-y-6">
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Login functionality will be implemented with NextAuth.js
-            </p>
-          </div>
+        <div className="mt-8">
+          <LoginForm />
         </div>
       </div>
     </div>

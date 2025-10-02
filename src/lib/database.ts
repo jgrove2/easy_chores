@@ -1,90 +1,337 @@
-// Database connection and utilities
-// This will be implemented with Prisma or direct database connection
+import { PrismaClient } from '@prisma/client';
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  image?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Prisma client instance
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
-export interface Group {
-  id: string;
-  name: string;
-  joinCode: string;
-  createdAt: Date;
-  updatedAt: Date;
-  members: User[];
-}
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
-export interface Chore {
-  id: string;
-  title: string;
-  frequency: 'daily' | 'weekly' | 'custom';
-  customInterval?: number;
-  assignmentType: 'single' | 'alternating';
-  groupId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  assignments: ChoreAssignment[];
-  completions: ChoreCompletion[];
-}
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
-export interface ChoreAssignment {
-  id: string;
-  choreId: string;
-  userId: string;
-  isActive: boolean;
-  createdAt: Date;
-}
-
-export interface ChoreCompletion {
-  id: string;
-  choreId: string;
-  userId: string;
-  completedAt: Date;
-  nextDueDate: Date;
-}
-
-// Database utility functions will be implemented here
+// Database utility functions
 export class DatabaseService {
   // User operations
-  async createUser(_userData: Partial<User>): Promise<User> {
-    // Implementation will be added
-    throw new Error('Not implemented');
+  async createUser(userData: {
+    email: string;
+    name?: string;
+    image?: string;
+  }) {
+    return await prisma.user.create({
+      data: userData,
+    });
   }
 
-  async getUserById(_id: string): Promise<User | null> {
-    // Implementation will be added
-    throw new Error('Not implemented');
+  async getUserById(id: string) {
+    return await prisma.user.findUnique({
+      where: { id },
+      include: {
+        groupMemberships: {
+          include: {
+            group: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getUserByEmail(email: string) {
+    return await prisma.user.findUnique({
+      where: { email },
+      include: {
+        groupMemberships: {
+          include: {
+            group: true,
+          },
+        },
+      },
+    });
+  }
+
+  async updateUser(id: string, data: { name?: string; image?: string }) {
+    return await prisma.user.update({
+      where: { id },
+      data,
+    });
   }
 
   // Group operations
-  async createGroup(_groupData: Partial<Group>): Promise<Group> {
-    // Implementation will be added
-    throw new Error('Not implemented');
+  async createGroup(groupData: {
+    name: string;
+    joinCode: string;
+  }) {
+    return await prisma.group.create({
+      data: groupData,
+    });
   }
 
-  async getGroupByJoinCode(_joinCode: string): Promise<Group | null> {
-    // Implementation will be added
-    throw new Error('Not implemented');
+  async getGroupByJoinCode(joinCode: string) {
+    return await prisma.group.findUnique({
+      where: { joinCode },
+      include: {
+        memberships: {
+          include: {
+            user: true,
+          },
+        },
+        chores: {
+          include: {
+            assignments: {
+              include: {
+                user: true,
+              },
+            },
+            completions: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getGroupById(id: string) {
+    return await prisma.group.findUnique({
+      where: { id },
+      include: {
+        memberships: {
+          include: {
+            user: true,
+          },
+        },
+        chores: {
+          include: {
+            assignments: {
+              include: {
+                user: true,
+              },
+            },
+            completions: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async addUserToGroup(userId: string, groupId: string, role: string = 'member') {
+    return await prisma.groupMembership.create({
+      data: {
+        userId,
+        groupId,
+        role,
+      },
+      include: {
+        user: true,
+        group: true,
+      },
+    });
+  }
+
+  async removeUserFromGroup(userId: string, groupId: string) {
+    return await prisma.groupMembership.delete({
+      where: {
+        userId_groupId: {
+          userId,
+          groupId,
+        },
+      },
+    });
   }
 
   // Chore operations
-  async createChore(_choreData: Partial<Chore>): Promise<Chore> {
-    // Implementation will be added
-    throw new Error('Not implemented');
+  async createChore(choreData: {
+    title: string;
+    frequency: string;
+    customInterval?: number;
+    assignmentType: string;
+    groupId: string;
+  }) {
+    return await prisma.chore.create({
+      data: choreData,
+      include: {
+        group: true,
+        assignments: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
   }
 
-  async getChoresByGroup(_groupId: string): Promise<Chore[]> {
-    // Implementation will be added
-    throw new Error('Not implemented');
+  async getChoresByGroup(groupId: string) {
+    return await prisma.chore.findMany({
+      where: { 
+        groupId,
+        isActive: true,
+      },
+      include: {
+        assignments: {
+          include: {
+            user: true,
+          },
+        },
+        completions: {
+          include: {
+            user: true,
+          },
+          orderBy: {
+            completedAt: 'desc',
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
-  async completeChore(_choreId: string, _userId: string): Promise<ChoreCompletion> {
-    // Implementation will be added
-    throw new Error('Not implemented');
+  async getChoreById(id: string) {
+    return await prisma.chore.findUnique({
+      where: { id },
+      include: {
+        group: true,
+        assignments: {
+          include: {
+            user: true,
+          },
+        },
+        completions: {
+          include: {
+            user: true,
+          },
+          orderBy: {
+            completedAt: 'desc',
+          },
+        },
+      },
+    });
+  }
+
+  async assignChoreToUser(choreId: string, userId: string) {
+    return await prisma.choreAssignment.create({
+      data: {
+        choreId,
+        userId,
+      },
+      include: {
+        chore: true,
+        user: true,
+      },
+    });
+  }
+
+  async completeChore(choreId: string, userId: string, nextDueDate: Date) {
+    return await prisma.choreCompletion.create({
+      data: {
+        choreId,
+        userId,
+        nextDueDate,
+      },
+      include: {
+        chore: true,
+        user: true,
+      },
+    });
+  }
+
+  async getChoreCompletions(choreId: string) {
+    return await prisma.choreCompletion.findMany({
+      where: { choreId },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        completedAt: 'desc',
+      },
+    });
+  }
+
+  async getTodaysChores(userId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return await prisma.chore.findMany({
+      where: {
+        isActive: true,
+        assignments: {
+          some: {
+            userId,
+            isActive: true,
+          },
+        },
+        OR: [
+          {
+            frequency: 'daily',
+          },
+          {
+            frequency: 'weekly',
+            completions: {
+              none: {
+                userId,
+                completedAt: {
+                  gte: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000),
+                },
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        assignments: {
+          where: {
+            userId,
+            isActive: true,
+          },
+          include: {
+            user: true,
+          },
+        },
+        completions: {
+          where: {
+            userId,
+            completedAt: {
+              gte: today,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async updateChore(id: string, data: {
+    title?: string;
+    frequency?: string;
+    customInterval?: number;
+    assignmentType?: string;
+    isActive?: boolean;
+  }) {
+    return await prisma.chore.update({
+      where: { id },
+      data,
+      include: {
+        group: true,
+        assignments: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+  }
+
+  async deleteChore(id: string) {
+    return await prisma.chore.delete({
+      where: { id },
+    });
   }
 }
+
+// Export a singleton instance
+export const db = new DatabaseService();
