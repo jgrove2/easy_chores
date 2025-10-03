@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId') || (session.user as { id: string }).id;
+    const userId = searchParams.get('userId') || (session.user as { id: string; email?: string; name?: string }).id;
     const groupId = searchParams.get('groupId');
 
     // Get user's chores

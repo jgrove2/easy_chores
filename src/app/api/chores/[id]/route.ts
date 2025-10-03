@@ -75,7 +75,7 @@ export async function PUT(
     }
 
     // Update chore
-    const userId = (session.user as { id: string }).id;
+    const userId = (session.user as { id: string; email?: string; name?: string }).id;
     if (!userId) {
       return NextResponse.json(
         { error: 'User ID not found in session' },
@@ -83,7 +83,7 @@ export async function PUT(
       );
     }
 
-    const updateData: Record<string, unknown> = {
+    const updateData: Record<string, string | number | boolean | null> = {
       lastModifiedBy: userId,
     };
 

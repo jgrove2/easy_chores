@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new chore
-    const userId = (session.user as { id: string }).id;
+    const userId = (session.user as { id: string; email?: string; name?: string }).id;
     if (!userId) {
       return NextResponse.json(
         { error: 'User ID not found in session' },
