@@ -15,11 +15,22 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset",
     "db:setup:dev": "npm run db:generate && npm run db:push && npm run db:seed",
+    "db:setup:supabase": "npm run db:generate && npm run db:push && npm run db:seed",
     "db:setup:prod": "npm run db:generate && npm run db:migrate:deploy && npm run db:seed",
     "setup": "npm install && npm run db:setup:dev",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:status": "npx supabase status",
+    "supabase:db:reset": "npx supabase db reset",
+    "supabase:gen:types": "npx supabase gen types typescript --local > src/types/supabase.ts",
+    "docker:build": "docker build -t easy-chores .",
+    "docker:run": "docker run -d --name easy-chores-app -p 3000:3000 --env-file .env easy-chores",
+    "docker:stop": "docker stop easy-chores-app",
+    "docker:rm": "docker rm easy-chores-app",
+    "docker:logs": "docker logs easy-chores-app",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f"
+    "docker:restart": "docker-compose restart"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

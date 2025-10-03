@@ -95,7 +95,7 @@ src/
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Authentication**: NextAuth.js
-- **Database**: SQLite (local) / PostgreSQL (production)
+- **Database**: SQLite (local) / Supabase (production)
 - **ORM**: Prisma
 
 ## 🔧 Development
@@ -119,32 +119,41 @@ The application uses SQLite locally with the following main entities:
 - **Feature Components**: Domain-specific components in `src/components/`
 - **Custom Hooks**: Shared logic in `src/hooks/`
 
-## 🚀 Production Setup (PostgreSQL)
+## 🚀 Production Setup (Supabase)
 
-For production deployment with PostgreSQL, see the detailed [Database Setup Guide](DATABASE_SETUP.md).
+For production deployment with Supabase, see the detailed [Database Setup Guide](DATABASE_SETUP.md).
 
 ### Quick Production Setup
 
-1. **Start PostgreSQL with Docker:**
+1. **Create Supabase project:**
+   - Go to [supabase.com](https://supabase.com) and create a new project
+   - Get your project URL and API keys
+
+2. **Set up environment variables:**
    ```bash
-   npm run docker:up
+   # Add to .env.production:
+   DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+   DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+   SUPABASE_URL="https://[PROJECT-REF].supabase.co"
+   SUPABASE_ANON_KEY="your-anon-key"
    ```
 
-2. **Set up production database:**
+3. **Set up production database:**
    ```bash
-   npm run db:setup:prod
+   npm run db:setup:supabase
    ```
 
-3. **Build and start:**
+4. **Build and start:**
    ```bash
    npm run build
    npm run start
    ```
 
-### Full Docker Deployment
+### Local Supabase Development
 
 ```bash
-docker-compose -f docker-compose.prod.yml up -d
+npm run supabase:start
+npm run db:setup:supabase
 ```
 
 ## 📱 Application Flow

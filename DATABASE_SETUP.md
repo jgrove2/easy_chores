@@ -1,6 +1,6 @@
 # Database Setup Guide
 
-This application supports both SQLite (development) and PostgreSQL (production).
+This application supports SQLite (development) and Supabase (production).
 
 ## Development Setup (SQLite)
 
@@ -25,28 +25,32 @@ For local development, the application uses SQLite by default:
    npm run dev
    ```
 
-## Production Setup (PostgreSQL)
+## Production Setup (Supabase)
 
-For production deployment with PostgreSQL:
+For production deployment with Supabase:
 
-### Option 1: Local PostgreSQL with Docker
+### Option 1: Supabase Cloud (Recommended)
 
-1. **Start PostgreSQL container:**
-   ```bash
-   npm run docker:up
-   ```
+1. **Create a Supabase project:**
+   - Go to [supabase.com](https://supabase.com)
+   - Create a new project
+   - Note your project URL and API keys
 
 2. **Set up environment variables:**
    ```bash
    # Create .env.production file with:
-   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/easy_chores?schema=public"
+   DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
+   DIRECT_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
    NEXTAUTH_URL="https://your-domain.com"
    NEXTAUTH_SECRET="your-production-secret-key-here"
+   SUPABASE_URL="https://[YOUR-PROJECT-REF].supabase.co"
+   SUPABASE_ANON_KEY="your-anon-key"
+   SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
    ```
 
 3. **Set up production database:**
    ```bash
-   npm run db:setup:prod
+   npm run db:setup:supabase
    ```
 
 4. **Build and start application:**
@@ -55,25 +59,34 @@ For production deployment with PostgreSQL:
    npm run start
    ```
 
-### Option 2: Full Docker Deployment
+### Option 2: Local Supabase Development
 
-1. **Set up environment variables:**
+1. **Install Supabase CLI:**
    ```bash
-   # Create .env.production file with your production values
-   DATABASE_URL="postgresql://postgres:postgres@postgres:5432/easy_chores?schema=public"
-   NEXTAUTH_URL="https://your-domain.com"
-   NEXTAUTH_SECRET="your-production-secret-key-here"
+   npm install -g supabase
    ```
 
-2. **Start all services with Docker:**
+2. **Start local Supabase:**
    ```bash
-   docker-compose -f docker-compose.prod.yml up -d
+   npm run supabase:start
+   ```
+
+3. **Set up environment variables:**
+   ```bash
+   # Use the local Supabase URLs from the status command
+   npm run supabase:status
+   ```
+
+4. **Set up local database:**
+   ```bash
+   npm run db:setup:supabase
    ```
 
 ## Available Scripts
 
 - `npm run setup` - Complete development setup
 - `npm run db:setup:dev` - Set up development database
+- `npm run db:setup:supabase` - Set up Supabase database
 - `npm run db:setup:prod` - Set up production database
 - `npm run db:generate` - Generate Prisma client
 - `npm run db:push` - Push schema changes (development)
@@ -81,9 +94,10 @@ For production deployment with PostgreSQL:
 - `npm run db:migrate:deploy` - Deploy migrations (production)
 - `npm run db:seed` - Seed database with initial data
 - `npm run db:studio` - Open Prisma Studio
-- `npm run docker:up` - Start Docker containers
-- `npm run docker:down` - Stop Docker containers
-- `npm run docker:logs` - View Docker logs
+- `npm run supabase:start` - Start local Supabase
+- `npm run supabase:stop` - Stop local Supabase
+- `npm run supabase:status` - Check Supabase status
+- `npm run supabase:gen:types` - Generate TypeScript types from Supabase
 
 ## Environment Variables
 
@@ -96,13 +110,14 @@ For production deployment with PostgreSQL:
 ### Database URLs
 
 - **SQLite (development):** `file:./dev.db`
-- **PostgreSQL (production):** `postgresql://username:password@host:port/database?schema=public`
+- **Supabase (production):** `postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
+- **Local Supabase:** `postgresql://postgres:postgres@localhost:54322/postgres`
 
 ## Switching Between Databases
 
-To switch from SQLite to PostgreSQL:
+To switch from SQLite to Supabase:
 
-1. Update `DATABASE_URL` in your environment file
+1. Update `DATABASE_URL` and `DIRECT_URL` in your environment file
 2. Run `npm run db:generate` to regenerate Prisma client
 3. Run `npm run db:push` (development) or `npm run db:migrate:deploy` (production)
 
