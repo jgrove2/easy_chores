@@ -1,84 +1,54 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from './useAuth';
-
-interface Group {
-  id: string;
-  name: string;
-  joinCode: string;
-  memberships: Array<{
-    id: string;
-    role: string;
-    user: {
-      id: string;
-      name: string;
-      email: string;
-    };
-  }>;
-  chores: Array<{
-    id: string;
-    title: string;
-    frequency: string;
-    customInterval?: number;
-    assignmentType: string;
-    isActive: boolean;
-  }>;
-}
+import { useGroupQuery } from './queries/useGroupQuery';
+import { 
+  useCreateGroupMutation, 
+  useJoinGroupMutation, 
+  useLeaveGroupMutation 
+} from './mutations/useGroupMutations';
+import { CreateGroupData, JoinGroupData, LeaveGroupData } from '@/types/group';
 
 export function useGroup() {
-  const { isAuthenticated } = useAuth();
-  const [group, setGroup] = useState<Group | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Query for fetching groups
+  const { data: groupsData, isLoading, error, refetch } = useGroupQuery();
+  
+  // Mutations for group operations
+  const createGroupMutation = useCreateGroupMutation();
+  const joinGroupMutation = useJoinGroupMutation();
+  const leaveGroupMutation = useLeaveGroupMutation();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setIsLoading(false);
-      return;
-    }
-
-    // Fetch user's group
-    const fetchGroup = async () => {
-      try {
-        const response = await fetch('/api/groups');
-        const data = await response.json();
-        
-        if (data.success && data.currentGroup) {
-          setGroup(data.currentGroup);
-        } else {
-          setGroup(null);
-        }
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching group:', error);
-        setGroup(null);
-        setIsLoading(false);
-      }
-    };
-
-    fetchGroup();
-  }, [isAuthenticated]);
-
-  const joinGroup = async (joinCode: string) => {
-    try {
-      // Implementation will be added with API integration
-      console.log('Joining group with code:', joinCode);
-    } catch (error) {
-      console.error('Error joining group:', error);
-    }
+  // Helper functions that use the mutations
+  const createGroup = async (groupData: CreateGroupData) => {
+    return createGroupMutation.mutateAsync(groupData);
   };
 
-  const createGroup = async (name: string) => {
-    try {
-      // Implementation will be added with API integration
-      console.log('Creating group:', name);
-    } catch (error) {
-      console.error('Error creating group:', error);
-    }
+  const joinGroup = async (joinData: JoinGroupData) => {
+    return joinGroupMutation.mutateAsync(joinData);
+  };
+
+  const leaveGroup = async (leaveData: LeaveGroupData) => {
+    return leaveGroupMutation.mutateAsync(leaveData);
   };
 
   return {
-    group,
+    // Data
+    group: groupsData?.currentGroup || null,
+    groups: groupsData?.groups || [],
     isLoading,
-    joinGroup,
+    error,
+    
+    // Actions
     createGroup,
+    joinGroup,
+    leaveGroup,
+    refetch,
+    
+    // Mutation states for UI feedback
+    isCreating: createGroupMutation.isPending,
+    isJoining: joinGroupMutation.isPending,
+    isLeaving: leaveGroupMutation.isPending,
+    
+    // Mutation errors
+    createError: createGroupMutation.error,
+    joinError: joinGroupMutation.error,
+    leaveError: leaveGroupMutation.error,
   };
 }

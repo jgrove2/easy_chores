@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import TopBar from '@/components/navigation/TopBar';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { useGroup } from '@/hooks/useGroup';
+import { useChores } from '@/hooks/useChores';
 
 interface Chore {
   id: string;
@@ -24,10 +25,10 @@ export default function EditChorePage() {
   const router = useRouter();
   const params = useParams();
   const { group } = useGroup();
+  const { updateChore, isUpdating, updateError } = useChores();
   
   const [chore, setChore] = useState<Chore | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [choreTitle, setChoreTitle] = useState('');
   const [frequency, setFrequency] = useState('daily');
@@ -98,38 +99,20 @@ export default function EditChorePage() {
     
     if (!choreTitle.trim() || !group?.id) return;
     
-    setIsSubmitting(true);
-    
     try {
-      const response = await fetch(`/api/chores/${choreId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: choreTitle,
-          frequency,
-          frequencyValue,
-          assignmentType,
-          assignedUserId: hasAssignedPerson ? selectedUser : null,
-        }),
+      await updateChore(choreId, {
+        title: choreTitle,
+        frequency,
+        frequencyValue,
+        assignmentType,
+        assignedUserId: hasAssignedPerson ? selectedUser || undefined : undefined,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update chore');
-      }
-
-      const result = await response.json();
-      console.log('Chore updated successfully:', result);
       
       // Redirect back to chores page
       router.push('/chores');
     } catch (error) {
       console.error('Error updating chore:', error);
       alert('Failed to update chore. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -302,14 +285,14 @@ export default function EditChorePage() {
               </button>
               <button
                 type="submit"
-                disabled={!choreTitle.trim() || isSubmitting}
+                disabled={!choreTitle.trim() || isUpdating}
                 className={`px-4 py-2 rounded-lg transition-colors ${
-                  !choreTitle.trim() || isSubmitting
+                  !choreTitle.trim() || isUpdating
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               >
-                {isSubmitting ? 'Updating...' : 'Update Chore'}
+                {isUpdating ? 'Updating...' : 'Update Chore'}
               </button>
             </div>
           </form>

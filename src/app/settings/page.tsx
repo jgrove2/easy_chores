@@ -14,7 +14,19 @@ import { useGroup } from '@/hooks/useGroup';
 export default function SettingsPage() {
   const { data: session } = useSession();
   const router = useRouter();
-  const { group, isLoading: groupLoading } = useGroup();
+  const { 
+    group, 
+    isLoading: groupLoading, 
+    createGroup, 
+    joinGroup, 
+    leaveGroup,
+    isCreating,
+    isJoining,
+    isLeaving,
+    createError,
+    joinError,
+    leaveError
+  } = useGroup();
   
   // User settings state
   const [displayName, setDisplayName] = useState('');
@@ -26,11 +38,7 @@ export default function SettingsPage() {
 
   // Group management state
   const [groupAction, setGroupAction] = useState<'none' | 'create' | 'join'>('none');
-  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
-  const [isJoiningGroup, setIsJoiningGroup] = useState(false);
-  const [isLeavingGroup, setIsLeavingGroup] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [groupError, setGroupError] = useState('');
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -105,97 +113,33 @@ export default function SettingsPage() {
 
   // Group management functions
   const handleCreateGroup = async (groupName: string) => {
-    setIsCreatingGroup(true);
-    setGroupError('');
-    
     try {
-      const response = await fetch('/api/groups', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: groupName }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create group');
-      }
-
-      // Refresh the page to show the new group
-      window.location.reload();
+      await createGroup({ name: groupName });
+      setGroupAction('none');
     } catch (error) {
       console.error('Error creating group:', error);
-      setGroupError(error instanceof Error ? error.message : 'Failed to create group');
-    } finally {
-      setIsCreatingGroup(false);
     }
   };
 
   const handleJoinGroup = async (joinCode: string) => {
-    setIsJoiningGroup(true);
-    setGroupError('');
-    
     try {
-      const response = await fetch('/api/groups/join', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ joinCode }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to join group');
-      }
-
-      // Refresh the page to show the joined group
-      window.location.reload();
+      await joinGroup({ joinCode });
+      setGroupAction('none');
     } catch (error) {
       console.error('Error joining group:', error);
-      setGroupError(error instanceof Error ? error.message : 'Failed to join group');
-    } finally {
-      setIsJoiningGroup(false);
     }
   };
 
   const handleLeaveGroup = async () => {
     if (!group) return;
     
-    setIsLeavingGroup(true);
-    setGroupError('');
-    
     try {
-      const response = await fetch('/api/groups/leave', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ groupId: group.id }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to leave group');
-      }
-
-      if (data.groupDeleted) {
+      const result = await leaveGroup({ groupId: group.id });
+      if (result.groupDeleted) {
         setShowDeleteConfirmation(false);
-        // Show success message and refresh
-        window.location.reload();
-      } else {
-        // Just refresh to show no group state
-        window.location.reload();
       }
     } catch (error) {
       console.error('Error leaving group:', error);
-      setGroupError(error instanceof Error ? error.message : 'Failed to leave group');
-    } finally {
-      setIsLeavingGroup(false);
     }
   };
 
@@ -230,14 +174,16 @@ export default function SettingsPage() {
                   }
                 }}
                 onDeleteGroup={async () => setShowDeleteConfirmation(true)}
-                isLeaving={isLeavingGroup}
+                isLeaving={isLeaving}
               />
             ) : (
               // User is not in a group - show options
               <div className="space-y-4">
-                {groupError && (
+                {(createError || joinError) && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-sm text-red-600">{groupError}</p>
+                    <p className="text-sm text-red-600">
+                      {createError?.message || joinError?.message || 'An error occurred'}
+                    </p>
                   </div>
                 )}
                 
@@ -276,7 +222,7 @@ export default function SettingsPage() {
                     </div>
                     <CreateGroupForm
                       onCreateGroup={handleCreateGroup}
-                      isLoading={isCreatingGroup}
+                      isLoading={isCreating}
                     />
                   </div>
                 )}
@@ -294,7 +240,7 @@ export default function SettingsPage() {
                     </div>
                     <JoinGroupForm
                       onJoinGroup={handleJoinGroup}
-                      isLoading={isJoiningGroup}
+                      isLoading={isJoining}
                     />
                   </div>
                 )}
@@ -377,7 +323,7 @@ export default function SettingsPage() {
         isVisible={showDeleteConfirmation}
         onConfirm={handleDeleteGroup}
         onCancel={() => setShowDeleteConfirmation(false)}
-        isDeleting={isLeavingGroup}
+        isDeleting={isLeaving}
       />
     </div>
   );

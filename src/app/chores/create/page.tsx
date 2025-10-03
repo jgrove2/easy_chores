@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import TopBar from '@/components/navigation/TopBar';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { useGroup } from '@/hooks/useGroup';
+import { useChores } from '@/hooks/useChores';
 
 export default function CreateChorePage() {
   const router = useRouter();
   const { group } = useGroup();
+  const { createChore, isCreating, createError } = useChores();
   
   const [choreTitle, setChoreTitle] = useState('');
   const [frequency, setFrequency] = useState('daily');
@@ -17,7 +19,6 @@ export default function CreateChorePage() {
   const [hasAssignedPerson, setHasAssignedPerson] = useState(false);
   const [showUserSelection, setShowUserSelection] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleBack = () => {
     router.back();
@@ -39,39 +40,21 @@ export default function CreateChorePage() {
     
     if (!choreTitle.trim() || !group?.id) return;
     
-    setIsSubmitting(true);
-    
     try {
-      const response = await fetch('/api/chores', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: choreTitle,
-          frequency,
-          frequencyValue,
-          assignmentType,
-          groupId: group.id,
-          assignedUserId: hasAssignedPerson ? selectedUser : null,
-        }),
+      await createChore({
+        title: choreTitle,
+        frequency,
+        frequencyValue,
+        assignmentType,
+        groupId: group.id,
+        assignedUserId: hasAssignedPerson ? selectedUser || undefined : undefined,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create chore');
-      }
-
-      const result = await response.json();
-      console.log('Chore created successfully:', result);
       
       // Redirect back to home page
       router.push('/home');
     } catch (error) {
       console.error('Error creating chore:', error);
       alert('Failed to create chore. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -209,14 +192,14 @@ export default function CreateChorePage() {
               </button>
               <button
                 type="submit"
-                disabled={!choreTitle.trim() || isSubmitting}
+                disabled={!choreTitle.trim() || isCreating}
                 className={`px-4 py-2 rounded-lg transition-colors ${
-                  !choreTitle.trim() || isSubmitting
+                  !choreTitle.trim() || isCreating
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               >
-                {isSubmitting ? 'Creating...' : 'Create Chore'}
+                {isCreating ? 'Creating...' : 'Create Chore'}
               </button>
             </div>
           </form>

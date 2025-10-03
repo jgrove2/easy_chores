@@ -44,7 +44,32 @@ export default function HomePage() {
   const handleCompleteChore = async (choreId: string) => {
     try {
       setCompletingChore(choreId);
-      await completeChore(choreId);
+      
+      // Calculate next due date based on chore frequency
+      const chore = chores.find(c => c.id === choreId);
+      if (!chore) {
+        throw new Error('Chore not found');
+      }
+      
+      const now = new Date();
+      const nextDueDate = new Date(now);
+      const interval = chore.customInterval || 1;
+      
+      switch (chore.frequency) {
+        case 'daily':
+          nextDueDate.setDate(nextDueDate.getDate() + interval);
+          break;
+        case 'weekly':
+          nextDueDate.setDate(nextDueDate.getDate() + (interval * 7));
+          break;
+        case 'monthly':
+          nextDueDate.setMonth(nextDueDate.getMonth() + interval);
+          break;
+        default:
+          nextDueDate.setDate(nextDueDate.getDate() + interval);
+      }
+      
+      await completeChore(choreId, nextDueDate);
     } catch (error) {
       console.error('Error completing chore:', error);
       alert('Failed to complete chore. Please try again.');

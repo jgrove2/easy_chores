@@ -7,7 +7,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useActivities } from '@/hooks/useActivities';
 
 export default function ActivitiesPage() {
-  const { activities, isLoading, error, refreshActivities } = useActivities();
+  const { activities, isLoading, error, refreshActivities } = useActivities({ limit: 50 });
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
