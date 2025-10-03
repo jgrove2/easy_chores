@@ -121,15 +121,30 @@ The application uses SQLite locally with the following main entities:
 
 ## 🚀 Production Setup (PostgreSQL)
 
-For production, simply change the `DATABASE_URL` in your environment to use PostgreSQL:
+For production deployment with PostgreSQL, see the detailed [Database Setup Guide](DATABASE_SETUP.md).
 
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/easy_chores"
-```
+### Quick Production Setup
 
-Then run:
+1. **Start PostgreSQL with Docker:**
+   ```bash
+   npm run docker:up
+   ```
+
+2. **Set up production database:**
+   ```bash
+   npm run db:setup:prod
+   ```
+
+3. **Build and start:**
+   ```bash
+   npm run build
+   npm run start
+   ```
+
+### Full Docker Deployment
+
 ```bash
-npx prisma migrate deploy
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ## 📱 Application Flow
