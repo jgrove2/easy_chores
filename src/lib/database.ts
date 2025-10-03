@@ -59,10 +59,27 @@ export class DatabaseService {
   async createGroup(groupData: {
     name: string;
     joinCode: string;
+    createdBy?: string;
   }) {
-    return await prisma.group.create({
+    const group = await prisma.group.create({
       data: groupData,
     });
+
+    // Log activity if createdBy is provided
+    if (groupData.createdBy) {
+      await this.logActivity({
+        groupId: group.id,
+        userId: groupData.createdBy,
+        type: 'group_created',
+        description: `created group "${groupData.name}"`,
+        metadata: {
+          groupName: groupData.name,
+          joinCode: groupData.joinCode,
+        },
+      });
+    }
+
+    return group;
   }
 
   async getGroupByJoinCode(joinCode: string) {
@@ -120,7 +137,7 @@ export class DatabaseService {
   }
 
   async addUserToGroup(userId: string, groupId: string, role: string = 'member') {
-    return await prisma.groupMembership.create({
+    const membership = await prisma.groupMembership.create({
       data: {
         userId,
         groupId,
@@ -131,9 +148,53 @@ export class DatabaseService {
         group: true,
       },
     });
+
+    // Log activity
+    await this.logActivity({
+      groupId: groupId,
+      userId: userId,
+      type: 'user_joined',
+      description: `joined the group`,
+      metadata: {
+        role: role,
+        groupName: membership.group.name,
+      },
+    });
+
+    return membership;
   }
 
   async removeUserFromGroup(userId: string, groupId: string) {
+    // Get user and group details for activity logging
+    const membership = await prisma.groupMembership.findUnique({
+      where: {
+        userId_groupId: {
+          userId,
+          groupId,
+        },
+      },
+      include: {
+        user: true,
+        group: true,
+      },
+    });
+
+    if (!membership) {
+      throw new Error('Membership not found');
+    }
+
+    // Log activity before deletion
+    await this.logActivity({
+      groupId: groupId,
+      userId: userId,
+      type: 'user_left',
+      description: `left the group`,
+      metadata: {
+        role: membership.role,
+        groupName: membership.group.name,
+      },
+    });
+
     return await prisma.groupMembership.delete({
       where: {
         userId_groupId: {
@@ -155,13 +216,29 @@ export class DatabaseService {
     assignedUserId?: string;
     nextDueDate?: Date;
   }) {
-    return await prisma.chore.create({
+    const chore = await prisma.chore.create({
       data: choreData,
       include: {
         group: true,
         // lastModifier is not a valid relation; remove it to fix the type error
       },
     });
+
+    // Log activity
+    if (choreData.lastModifiedBy) {
+      await this.logActivity({
+        groupId: choreData.groupId,
+        userId: choreData.lastModifiedBy,
+        type: 'chore_created',
+        description: `created chore "${choreData.title}"`,
+        metadata: {
+          choreId: chore.id,
+          choreTitle: choreData.title,
+        },
+      });
+    }
+
+    return chore;
   }
 
   async getChoresByGroup(groupId: string) {
@@ -223,14 +300,39 @@ export class DatabaseService {
   }
 
   async completeChore(choreId: string, userId: string, nextDueDate: Date) {
+    // Get chore details for activity logging
+    const chore = await prisma.chore.findUnique({
+      where: { id: choreId },
+      include: { group: true },
+    });
+
+    if (!chore) {
+      throw new Error('Chore not found');
+    }
+
     // Update the chore's nextDueDate instead of creating a completion record
-    return await prisma.chore.update({
+    const updatedChore = await prisma.chore.update({
       where: { id: choreId },
       data: {
         nextDueDate: nextDueDate,
         lastModifiedBy: userId,
       },
     });
+
+    // Log activity
+    await this.logActivity({
+      groupId: chore.groupId,
+      userId: userId,
+      type: 'chore_completed',
+      description: `completed chore "${chore.title}"`,
+      metadata: {
+        choreId: chore.id,
+        choreTitle: chore.title,
+        nextDueDate: nextDueDate.toISOString(),
+      },
+    });
+
+    return updatedChore;
   }
 
   async getChoreCompletions(choreId: string) {
@@ -306,18 +408,105 @@ export class DatabaseService {
     lastModifiedBy?: string;
     assignedUserId?: string;
   }) {
-    return await prisma.chore.update({
+    // Get original chore for activity logging
+    const originalChore = await prisma.chore.findUnique({
+      where: { id },
+      include: { group: true },
+    });
+
+    if (!originalChore) {
+      throw new Error('Chore not found');
+    }
+
+    const updatedChore = await prisma.chore.update({
       where: { id },
       data,
       include: {
         group: true,
       },
     });
+
+    // Log activity if there's a lastModifiedBy
+    if (data.lastModifiedBy) {
+      await this.logActivity({
+        groupId: originalChore.groupId,
+        userId: data.lastModifiedBy,
+        type: 'chore_updated',
+        description: `updated chore "${originalChore.title}"`,
+        metadata: {
+          choreId: originalChore.id,
+          choreTitle: originalChore.title,
+          changes: data,
+        },
+      });
+    }
+
+    return updatedChore;
   }
 
-  async deleteChore(id: string) {
-    return await prisma.chore.delete({
+  async deleteChore(id: string, userId?: string) {
+    // Get chore details for activity logging
+    const chore = await prisma.chore.findUnique({
       where: { id },
+      include: { group: true },
+    });
+
+    if (!chore) {
+      throw new Error('Chore not found');
+    }
+
+    const deletedChore = await prisma.chore.delete({
+      where: { id },
+    });
+
+    // Log activity if userId is provided
+    if (userId) {
+      await this.logActivity({
+        groupId: chore.groupId,
+        userId: userId,
+        type: 'chore_deleted',
+        description: `deleted chore "${chore.title}"`,
+        metadata: {
+          choreId: chore.id,
+          choreTitle: chore.title,
+        },
+      });
+    }
+
+    return deletedChore;
+  }
+
+  // Activity logging operations
+  async logActivity(data: {
+    groupId: string;
+    userId: string;
+    type: string;
+    description: string;
+    metadata?: any;
+  }) {
+    return await prisma.activity.create({
+      data: {
+        ...data,
+        metadata: data.metadata ? JSON.stringify(data.metadata) : null,
+      },
+      include: {
+        user: true,
+        group: true,
+      },
+    });
+  }
+
+  async getActivitiesByGroup(groupId: string, limit: number = 50) {
+    return await prisma.activity.findMany({
+      where: { groupId },
+      include: {
+        user: true,
+        group: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
     });
   }
 }

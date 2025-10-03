@@ -24,6 +24,7 @@ model User {
   choreCompletions ChoreCompletion[]
   modifiedChores   Chore[] @relation("ChoreLastModifier")
   assignedChores   Chore[] @relation("ChoreAssignedUser")
+  activities       Activity[]
 
   @@map("users")
 }
@@ -38,6 +39,7 @@ model Group {
   // Relations
   memberships GroupMembership[]
   chores      Chore[]
+  activities  Activity[]
 
   @@map("groups")
 }
@@ -107,4 +109,20 @@ model ChoreCompletion {
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("chore_completions")
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  groupId     String
+  userId      String
+  type        String   // chore_created, chore_updated, chore_deleted, chore_completed, user_joined, user_left, group_created, group_deleted
+  description String
+  metadata    String?  // JSON string for additional data
+  createdAt   DateTime @default(now())
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activities")
 }
