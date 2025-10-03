@@ -23,14 +23,13 @@
     "supabase:status": "npx supabase status",
     "supabase:db:reset": "npx supabase db reset",
     "supabase:gen:types": "npx supabase gen types typescript --local > src/types/supabase.ts",
-    "docker:build": "docker build -t easy-chores .",
-    "docker:run": "docker run -d --name easy-chores-app -p 3000:3000 --env-file .env easy-chores",
-    "docker:stop": "docker stop easy-chores-app",
-    "docker:rm": "docker rm easy-chores-app",
-    "docker:logs": "docker logs easy-chores-app",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:restart": "docker-compose restart"
+    "vercel:dev": "vercel dev",
+    "vercel:build": "vercel build",
+    "vercel:deploy": "vercel --prod",
+    "vercel:preview": "vercel",
+    "vercel:logs": "vercel logs",
+    "vercel:env:pull": "vercel env pull .env.local",
+    "vercel:env:push": "vercel env push .env.local"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

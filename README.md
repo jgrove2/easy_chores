@@ -119,41 +119,51 @@ The application uses SQLite locally with the following main entities:
 - **Feature Components**: Domain-specific components in `src/components/`
 - **Custom Hooks**: Shared logic in `src/hooks/`
 
-## 🚀 Production Setup (Supabase)
+## 🚀 Production Deployment (Vercel + Supabase)
 
-For production deployment with Supabase, see the detailed [Database Setup Guide](DATABASE_SETUP.md).
+For production deployment, see the detailed [Vercel Deployment Guide](VERCEL_DEPLOYMENT.md).
 
-### Quick Production Setup
+### Quick Vercel Deployment
 
 1. **Create Supabase project:**
    - Go to [supabase.com](https://supabase.com) and create a new project
    - Get your project URL and API keys
 
-2. **Set up environment variables:**
+2. **Deploy to Vercel:**
    ```bash
-   # Add to .env.production:
-   DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
-   DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
-   SUPABASE_URL="https://[PROJECT-REF].supabase.co"
-   SUPABASE_ANON_KEY="your-anon-key"
+   # Install Vercel CLI
+   npm install -g vercel
+   
+   # Deploy to Vercel
+   vercel --prod
    ```
 
-3. **Set up production database:**
+3. **Set up environment variables in Vercel:**
+   - Go to your Vercel project settings
+   - Add environment variables:
+     ```
+     DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+     DIRECT_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+     NEXTAUTH_URL=https://your-app.vercel.app
+     NEXTAUTH_SECRET=your-production-secret
+     ```
+
+4. **Set up database:**
    ```bash
    npm run db:setup:supabase
    ```
 
-4. **Build and start:**
-   ```bash
-   npm run build
-   npm run start
-   ```
-
-### Local Supabase Development
+### Local Development
 
 ```bash
+# Start local Supabase
 npm run supabase:start
+
+# Set up local database
 npm run db:setup:supabase
+
+# Start development server
+npm run dev
 ```
 
 ## 📱 Application Flow
