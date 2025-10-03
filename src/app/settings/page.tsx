@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import TopBar from '@/components/navigation/TopBar';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import CreateGroupForm from '@/components/group/CreateGroupForm';
@@ -13,7 +12,6 @@ import { useGroup } from '@/hooks/useGroup';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
-  const router = useRouter();
   const { 
     group, 
     isLoading: groupLoading, 
@@ -24,8 +22,7 @@ export default function SettingsPage() {
     isJoining,
     isLeaving,
     createError,
-    joinError,
-    leaveError
+    joinError
   } = useGroup();
   
   // User settings state
@@ -190,7 +187,7 @@ export default function SettingsPage() {
                 {groupAction === 'none' && (
                   <div className="space-y-3">
                     <p className="text-gray-600 text-sm">
-                      You're not currently part of any group. Choose an option below to get started.
+                      You&apos;re not currently part of any group. Choose an option below to get started.
                     </p>
                     <div className="flex space-x-3">
                       <button
@@ -302,7 +299,7 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-gray-600 mb-4">
-                  Sign out of your account. You'll need to sign in again to access your chores.
+                  Sign out of your account. You&apos;ll need to sign in again to access your chores.
                 </p>
                 <button
                   onClick={handleLogout}

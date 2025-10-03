@@ -85,7 +85,7 @@ export default function ActivitiesPage() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Activities</h3>
-              <p className="text-gray-600 mb-4">{error}</p>
+              <p className="text-gray-600 mb-4">{error?.message || 'An error occurred'}</p>
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}

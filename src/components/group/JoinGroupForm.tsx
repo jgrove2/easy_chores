@@ -13,9 +13,7 @@ export default function JoinGroupForm({ onJoinGroup, isLoading }: JoinGroupFormP
   const [joinCode, setJoinCode] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async () => {
     if (!joinCode.trim()) {
       setError('Join code is required');
       return;

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import TopBar from '@/components/navigation/TopBar';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
@@ -11,7 +10,7 @@ import { useChores } from '@/hooks/useChores';
 
 export default function ChoresPage() {
   const router = useRouter();
-  const { group, isLoading: groupLoading } = useGroup();
+  const { isLoading: groupLoading } = useGroup();
   const { chores, isLoading: choresLoading } = useChores();
 
   const handleEditChore = (choreId: string) => {

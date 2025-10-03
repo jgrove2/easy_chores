@@ -32,7 +32,7 @@ export default function WarningPopup({ isVisible }: WarningPopupProps) {
         
         <div className="mb-6">
           <p className="text-sm text-gray-600">
-            You're not currently part of any group. To start managing chores, you'll need to either join an existing group or create a new one.
+            You&apos;re not currently part of any group. To start managing chores, you&apos;ll need to either join an existing group or create a new one.
           </p>
         </div>
         
@@ -45,7 +45,7 @@ export default function WarningPopup({ isVisible }: WarningPopupProps) {
           </Button>
           <Button
             onClick={() => window.location.reload()}
-            variant="outline"
+            variant="secondary"
             className="flex-1"
           >
             Dismiss

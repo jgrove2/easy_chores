@@ -25,7 +25,7 @@ export default function EditChorePage() {
   const router = useRouter();
   const params = useParams();
   const { group } = useGroup();
-  const { updateChore, isUpdating, updateError } = useChores();
+  const { updateChore, isUpdating } = useChores();
   
   const [chore, setChore] = useState<Chore | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -137,7 +137,7 @@ export default function EditChorePage() {
         <div className="max-w-2xl mx-auto py-6 px-4">
           <div className="text-center py-12">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Chore not found</h3>
-            <p className="text-gray-600 mb-4">The chore you're looking for doesn't exist.</p>
+            <p className="text-gray-600 mb-4">The chore you&apos;re looking for doesn&apos;t exist.</p>
             <button
               onClick={() => router.push('/chores')}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

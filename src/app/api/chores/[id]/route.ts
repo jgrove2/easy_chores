@@ -5,7 +5,7 @@ import { db } from '@/lib/database';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,7 +14,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const choreId = params.id;
+    const { id: choreId } = await params;
 
     if (!choreId) {
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -54,7 +54,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const choreId = params.id;
+    const { id: choreId } = await params;
     const body = await request.json();
     const { title, frequency, frequencyValue, assignmentType, isActive, assignedUserId } = body;
 
@@ -75,7 +75,7 @@ export async function PUT(
     }
 
     // Update chore
-    const userId = (session.user as any).id;
+    const userId = (session.user as { id: string }).id;
     if (!userId) {
       return NextResponse.json(
         { error: 'User ID not found in session' },
@@ -83,7 +83,7 @@ export async function PUT(
       );
     }
 
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       lastModifiedBy: userId,
     };
 
@@ -113,7 +113,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -122,7 +122,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const choreId = params.id;
+    const { id: choreId } = await params;
 
     if (!choreId) {
       return NextResponse.json(

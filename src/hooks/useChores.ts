@@ -5,7 +5,7 @@ import {
   useDeleteChoreMutation, 
   useCompleteChoreMutation 
 } from './mutations/useChoreMutations';
-import { CreateChoreData, UpdateChoreData, CompleteChoreData } from '@/types/chore';
+import { CreateChoreData, UpdateChoreData } from '@/types/chore';
 
 export function useChores() {
   // Query for fetching chores

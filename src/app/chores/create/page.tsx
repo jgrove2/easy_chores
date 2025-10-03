@@ -10,7 +10,7 @@ import { useChores } from '@/hooks/useChores';
 export default function CreateChorePage() {
   const router = useRouter();
   const { group } = useGroup();
-  const { createChore, isCreating, createError } = useChores();
+  const { createChore, isCreating } = useChores();
   
   const [choreTitle, setChoreTitle] = useState('');
   const [frequency, setFrequency] = useState('daily');

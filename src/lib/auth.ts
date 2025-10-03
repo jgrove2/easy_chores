@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, profile }) {
       if (!user.email) return false;
 
       try {
@@ -24,13 +24,19 @@ export const authOptions: NextAuthOptions = {
           where: { email: user.email },
         });
 
+        // Type-safe profile access
+        const profileData = profile as Record<string, unknown> | undefined;
+        const profileName = profileData?.name as string | undefined;
+        const profilePicture = profileData?.picture as string | undefined;
+        const profileAvatar = profileData?.avatar_url as string | undefined;
+
         if (!existingUser) {
           // Create new user
           await prisma.user.create({
             data: {
               email: user.email,
-              name: user.name || profile?.name || '',
-              image: user.image || (profile as any)?.picture || (profile as any)?.avatar_url || '',
+              name: user.name || profileName || '',
+              image: user.image || profilePicture || profileAvatar || '',
             },
           });
         } else {
@@ -38,8 +44,8 @@ export const authOptions: NextAuthOptions = {
           await prisma.user.update({
             where: { email: user.email },
             data: {
-              name: user.name || profile?.name || existingUser.name,
-              image: user.image || (profile as any)?.picture || (profile as any)?.avatar_url || existingUser.image,
+              name: user.name || profileName || existingUser.name,
+              image: user.image || profilePicture || profileAvatar || existingUser.image,
             },
           });
         }
@@ -50,21 +56,21 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
     },
-    async session({ session, token }) {
+    async session({ session }) {
       // Add user ID to session
       if (session.user?.email) {
         const user = await prisma.user.findUnique({
           where: { email: session.user.email },
         });
         if (user) {
-          (session.user as any).id = user.id;
+          (session.user as { id: string }).id = user.id;
         }
       }
       return session;
     },
-    async jwt({ token }) {
+    async jwt() {
       // Add custom JWT properties here
-      return token;
+      return {};
     },
   },
   pages: {

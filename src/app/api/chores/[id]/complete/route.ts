@@ -5,7 +5,7 @@ import { db } from '@/lib/database';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,7 +14,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const choreId = params.id;
+    const { id: choreId } = await params;
 
     if (!choreId) {
       return NextResponse.json(
@@ -53,7 +53,7 @@ export async function POST(
     }
 
     // Complete the chore
-    const userId = (session.user as any).id;
+    const userId = (session.user as { id: string }).id;
     if (!userId) {
       return NextResponse.json(
         { error: 'User ID not found in session' },

@@ -482,7 +482,7 @@ export class DatabaseService {
     userId: string;
     type: string;
     description: string;
-    metadata?: any;
+    metadata?: Record<string, unknown>;
   }) {
     return await prisma.activity.create({
       data: {
