@@ -10,6 +10,12 @@ interface Chore {
   isActive: boolean;
   nextDueDate?: Date;
   isCompleted?: boolean;
+  createdAt?: Date;
+  assignedUser?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 export function useChores() {
@@ -18,15 +24,32 @@ export function useChores() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!group) {
-      setChores([]);
-      setIsLoading(false);
-      return;
-    }
+    const fetchChores = async () => {
+      if (!group) {
+        setChores([]);
+        setIsLoading(false);
+        return;
+      }
 
-    // Use chores from group data
-    setChores(group.chores || []);
-    setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/chores?groupId=${group.id}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch chores');
+        }
+        
+        const data = await response.json();
+        setChores(data.chores || []);
+      } catch (error) {
+        console.error('Error fetching chores:', error);
+        setChores([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChores();
   }, [group]);
 
   const createChore = async (choreData: Partial<Chore>) => {
@@ -40,10 +63,34 @@ export function useChores() {
 
   const completeChore = async (choreId: string) => {
     try {
-      // Implementation will be added with API integration
-      console.log('Completing chore:', choreId);
+      const response = await fetch(`/api/chores/${choreId}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to complete chore');
+      }
+
+      const result = await response.json();
+      console.log('Chore completed successfully:', result);
+      
+      // Refresh chores list
+      if (group) {
+        const choresResponse = await fetch(`/api/chores?groupId=${group.id}`);
+        if (choresResponse.ok) {
+          const data = await choresResponse.json();
+          setChores(data.chores || []);
+        }
+      }
+      
+      return result;
     } catch (error) {
       console.error('Error completing chore:', error);
+      throw error;
     }
   };
 

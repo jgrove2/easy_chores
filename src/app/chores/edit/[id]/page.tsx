@@ -1,14 +1,33 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import TopBar from '@/components/navigation/TopBar';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { useGroup } from '@/hooks/useGroup';
 
-export default function CreateChorePage() {
+interface Chore {
+  id: string;
+  title: string;
+  frequency: string;
+  customInterval?: number;
+  assignmentType: string;
+  isActive: boolean;
+  assignedUser?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+export default function EditChorePage() {
   const router = useRouter();
+  const params = useParams();
   const { group } = useGroup();
+  
+  const [chore, setChore] = useState<Chore | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [choreTitle, setChoreTitle] = useState('');
   const [frequency, setFrequency] = useState('daily');
@@ -17,7 +36,47 @@ export default function CreateChorePage() {
   const [hasAssignedPerson, setHasAssignedPerson] = useState(false);
   const [showUserSelection, setShowUserSelection] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const choreId = params.id as string;
+
+  useEffect(() => {
+    const fetchChore = async () => {
+      if (!choreId) return;
+      
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/chores/${choreId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch chore');
+        }
+        
+        const data = await response.json();
+        const choreData = data.chore;
+        setChore(choreData);
+        
+        // Populate form with existing data
+        setChoreTitle(choreData.title);
+        setFrequency(choreData.frequency);
+        setFrequencyValue(choreData.customInterval || 1);
+        setAssignmentType(choreData.assignmentType);
+        
+        // Set assigned person if exists
+        if (choreData.assignedUser) {
+          setHasAssignedPerson(true);
+          setSelectedUser(choreData.assignedUser.id);
+        }
+      } catch (error) {
+        console.error('Error fetching chore:', error);
+        alert('Failed to load chore. Please try again.');
+        router.push('/chores');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChore();
+  }, [choreId, router]);
 
   const handleBack = () => {
     router.back();
@@ -42,8 +101,8 @@ export default function CreateChorePage() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('/api/chores', {
-        method: 'POST',
+      const response = await fetch(`/api/chores/${choreId}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -52,33 +111,67 @@ export default function CreateChorePage() {
           frequency,
           frequencyValue,
           assignmentType,
-          groupId: group.id,
           assignedUserId: hasAssignedPerson ? selectedUser : null,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create chore');
+        throw new Error(errorData.error || 'Failed to update chore');
       }
 
       const result = await response.json();
-      console.log('Chore created successfully:', result);
+      console.log('Chore updated successfully:', result);
       
-      // Redirect back to home page
-      router.push('/home');
+      // Redirect back to chores page
+      router.push('/chores');
     } catch (error) {
-      console.error('Error creating chore:', error);
-      alert('Failed to create chore. Please try again.');
+      console.error('Error updating chore:', error);
+      alert('Failed to update chore. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20">
+        <TopBar title="Edit Chore" showBackButton={true} onBack={handleBack} />
+        <div className="max-w-2xl mx-auto py-6 px-4">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-gray-600">Loading...</div>
+          </div>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
+
+  if (!chore) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-20">
+        <TopBar title="Edit Chore" showBackButton={true} onBack={handleBack} />
+        <div className="max-w-2xl mx-auto py-6 px-4">
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Chore not found</h3>
+            <p className="text-gray-600 mb-4">The chore you're looking for doesn't exist.</p>
+            <button
+              onClick={() => router.push('/chores')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Back to Chores
+            </button>
+          </div>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <TopBar 
-        title="Create Chore" 
+        title="Edit Chore" 
         showBackButton={true}
         onBack={handleBack}
       />
@@ -216,7 +309,7 @@ export default function CreateChorePage() {
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               >
-                {isSubmitting ? 'Creating...' : 'Create Chore'}
+                {isSubmitting ? 'Updating...' : 'Update Chore'}
               </button>
             </div>
           </form>

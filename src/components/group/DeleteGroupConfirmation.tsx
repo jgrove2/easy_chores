@@ -44,7 +44,8 @@ export default function DeleteGroupConfirmation({
         <div className="flex space-x-3">
           <Button
             onClick={onCancel}
-            variant="outline"
+            variant="secondary"
+            size="sm"
             className="flex-1"
             disabled={isDeleting}
           >
@@ -52,6 +53,7 @@ export default function DeleteGroupConfirmation({
           </Button>
           <Button
             onClick={onConfirm}
+            size="sm"
             className="flex-1 bg-red-600 hover:bg-red-700 text-white disabled:bg-gray-300"
             disabled={isDeleting}
           >

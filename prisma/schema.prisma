@@ -22,6 +22,8 @@ model User {
   groupMemberships GroupMembership[]
   choreAssignments ChoreAssignment[]
   choreCompletions ChoreCompletion[]
+  modifiedChores   Chore[] @relation("ChoreLastModifier")
+  assignedChores   Chore[] @relation("ChoreAssignedUser")
 
   @@map("users")
 }
@@ -64,11 +66,16 @@ model Chore {
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  lastModifiedBy  String?  // User ID who last modified the chore
+  assignedUserId  String?  // User ID who is assigned to this chore
+  nextDueDate     DateTime? // Next due date for this chore
 
   // Relations
   group       Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
   assignments ChoreAssignment[]
   completions ChoreCompletion[]
+  lastModifier User?           @relation("ChoreLastModifier", fields: [lastModifiedBy], references: [id])
+  assignedUser User?           @relation("ChoreAssignedUser", fields: [assignedUserId], references: [id])
 
   @@map("chores")
 }

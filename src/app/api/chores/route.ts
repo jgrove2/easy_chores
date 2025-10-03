@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { db } from '@/lib/database';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,9 +22,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Get chores for the group
-    // Implementation will be added with database integration
+    const chores = await db.getChoresByGroup(groupId);
     
-    return NextResponse.json({ chores: [] });
+    return NextResponse.json({ chores });
   } catch (error) {
     console.error('Error fetching chores:', error);
     return NextResponse.json(
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, frequency, assignmentType, groupId } = body;
+    const { title, frequency, frequencyValue, assignmentType, groupId, assignedUserId } = body;
 
     if (!title || !frequency || !assignmentType || !groupId) {
       return NextResponse.json(
@@ -52,17 +53,49 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new chore
-    // Implementation will be added with database integration
+    const userId = (session.user as any).id;
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID not found in session' },
+        { status: 400 }
+      );
+    }
+
+    // Calculate initial next due date
+    const now = new Date();
+    const initialDueDate = new Date(now);
+    const interval = frequencyValue > 1 ? frequencyValue : 1;
+
+    switch (frequency) {
+      case 'daily':
+        initialDueDate.setDate(initialDueDate.getDate() + interval);
+        break;
+      case 'weekly':
+        initialDueDate.setDate(initialDueDate.getDate() + (interval * 7));
+        break;
+      case 'monthly':
+        initialDueDate.setMonth(initialDueDate.getMonth() + interval);
+        break;
+      default:
+        initialDueDate.setDate(initialDueDate.getDate() + interval);
+    }
+
+    const choreData = {
+      title,
+      frequency,
+      customInterval: frequencyValue > 1 ? frequencyValue : null,
+      assignmentType,
+      groupId,
+      lastModifiedBy: userId,
+      assignedUserId: assignedUserId || null,
+      nextDueDate: initialDueDate,
+    };
+
+    const chore = await db.createChore(choreData);
     
     return NextResponse.json({ 
       message: 'Chore created successfully',
-      chore: { 
-        id: 'temp-id', 
-        title, 
-        frequency, 
-        assignmentType, 
-        groupId 
-      }
+      chore
     });
   } catch (error) {
     console.error('Error creating chore:', error);

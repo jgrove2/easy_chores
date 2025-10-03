@@ -151,16 +151,15 @@ export class DatabaseService {
     customInterval?: number;
     assignmentType: string;
     groupId: string;
+    lastModifiedBy?: string;
+    assignedUserId?: string;
+    nextDueDate?: Date;
   }) {
     return await prisma.chore.create({
       data: choreData,
       include: {
         group: true,
-        assignments: {
-          include: {
-            user: true,
-          },
-        },
+        // lastModifier is not a valid relation; remove it to fix the type error
       },
     });
   }
@@ -172,19 +171,9 @@ export class DatabaseService {
         isActive: true,
       },
       include: {
-        assignments: {
-          include: {
-            user: true,
-          },
-        },
-        completions: {
-          include: {
-            user: true,
-          },
-          orderBy: {
-            completedAt: 'desc',
-          },
-        },
+        group: true,
+        assignments: true,
+        completions: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -197,19 +186,8 @@ export class DatabaseService {
       where: { id },
       include: {
         group: true,
-        assignments: {
-          include: {
-            user: true,
-          },
-        },
-        completions: {
-          include: {
-            user: true,
-          },
-          orderBy: {
-            completedAt: 'desc',
-          },
-        },
+        assignments: true,
+        completions: true,
       },
     });
   }
@@ -227,16 +205,20 @@ export class DatabaseService {
     });
   }
 
+  async deactivateChoreAssignments(choreId: string) {
+    return await prisma.choreAssignment.updateMany({
+      where: { choreId },
+      data: { isActive: false },
+    });
+  }
+
   async completeChore(choreId: string, userId: string, nextDueDate: Date) {
-    return await prisma.choreCompletion.create({
+    // Update the chore's nextDueDate instead of creating a completion record
+    return await prisma.chore.update({
+      where: { id: choreId },
       data: {
-        choreId,
-        userId,
         nextDueDate,
-      },
-      include: {
-        chore: true,
-        user: true,
+        lastModifiedBy: userId,
       },
     });
   }
@@ -311,17 +293,14 @@ export class DatabaseService {
     customInterval?: number;
     assignmentType?: string;
     isActive?: boolean;
+    lastModifiedBy?: string;
+    assignedUserId?: string;
   }) {
     return await prisma.chore.update({
       where: { id },
       data,
       include: {
         group: true,
-        assignments: {
-          include: {
-            user: true,
-          },
-        },
       },
     });
   }

@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
             data: {
               email: user.email,
               name: user.name || profile?.name || '',
-              image: user.image || profile?.picture || profile?.avatar_url || '',
+              image: user.image || (profile as any)?.picture || (profile as any)?.avatar_url || '',
             },
           });
         } else {
@@ -39,7 +39,7 @@ export const authOptions: NextAuthOptions = {
             where: { email: user.email },
             data: {
               name: user.name || profile?.name || existingUser.name,
-              image: user.image || profile?.picture || profile?.avatar_url || existingUser.image,
+              image: user.image || (profile as any)?.picture || (profile as any)?.avatar_url || existingUser.image,
             },
           });
         }
@@ -51,7 +51,15 @@ export const authOptions: NextAuthOptions = {
       }
     },
     async session({ session, token }) {
-      // Add custom session properties here
+      // Add user ID to session
+      if (session.user?.email) {
+        const user = await prisma.user.findUnique({
+          where: { email: session.user.email },
+        });
+        if (user) {
+          (session.user as any).id = user.id;
+        }
+      }
       return session;
     },
     async jwt({ token }) {
