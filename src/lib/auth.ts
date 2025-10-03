@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
           where: { email: session.user.email },
         });
         if (user) {
-          (session.user as { id: string }).id = user.id;
+          (session.user as { id: string; email?: string; name?: string }).id = user.id;
         }
       }
       return session;

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user's group
-    const userId = (session.user as { id: string }).id;
+    const userId = (session.user as { id: string; email?: string; name?: string }).id;
     const user = await db.getUserById(userId);
     if (!user || !user.groupMemberships.length) {
       return NextResponse.json({ error: 'User not in a group' }, { status: 400 });
