@@ -172,8 +172,18 @@ export class DatabaseService {
       },
       include: {
         group: true,
-        assignments: true,
-        completions: true,
+        assignments: {
+          include: {
+            user: true,
+          },
+        },
+        completions: {
+          include: {
+            user: true,
+          },
+        },
+        lastModifier: true,
+        assignedUser: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -217,7 +227,7 @@ export class DatabaseService {
     return await prisma.chore.update({
       where: { id: choreId },
       data: {
-        nextDueDate,
+        nextDueDate: nextDueDate,
         lastModifiedBy: userId,
       },
     });

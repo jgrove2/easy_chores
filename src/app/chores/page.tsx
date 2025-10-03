@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import TopBar from '@/components/navigation/TopBar';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import ChoreCard from '@/components/chore/ChoreCard';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useGroup } from '@/hooks/useGroup';
 import { useChores } from '@/hooks/useChores';
 
@@ -28,7 +29,7 @@ export default function ChoresPage() {
         <TopBar title="Manage Chores" />
         <div className="max-w-4xl mx-auto py-6 px-4">
           <div className="flex items-center justify-center h-64">
-            <div className="text-gray-600">Loading...</div>
+            <LoadingSpinner size="lg" text="Loading chores..." />
           </div>
         </div>
         <BottomNavigation />
